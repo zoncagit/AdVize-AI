@@ -6,8 +6,7 @@ from typing import Optional
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import relationship, Session
 
-from app.services import EmailService
-from app.Auth  import hash_password
+from app.utils.password import hash_password, verify_password
 from app.models  import User
 from app.models import PasswordResetToken
 from app.database import get_db
@@ -20,7 +19,6 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.Auth import hash_password, verify_password
 from app.models import User
 
 # Import configuration
@@ -150,10 +148,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 # Get frontend URL from environment variable or use default
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://127.0.0.1:5500/frontend')
 
-# Initialize email service
-email_service = EmailService.get_instance()
-if not email_service.is_configured:
-    raise Exception("Email service not properly configured")
 
 class PasswordResetService:
     @staticmethod
@@ -357,4 +351,8 @@ class EmailService:
         except Exception as e:
             logger.error(f"Failed to send email: {str(e)}")
             return False
-        
+
+# Initialize email service
+email_service = EmailService.get_instance()
+if not email_service.is_configured:
+    raise Exception("Email service not properly configured")

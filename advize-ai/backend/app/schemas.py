@@ -3,6 +3,16 @@ from datetime import datetime, date
 from typing import Optional, List
 import enum
 
+# --- VerificationRequest schema ---
+class VerificationRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+# --- Token schema for authentication ---
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 # --- ENUMS pour schémas (reprise de SQLAlchemy enums) ---
 class AdAccountStatus(str, enum.Enum):
     active = "active"

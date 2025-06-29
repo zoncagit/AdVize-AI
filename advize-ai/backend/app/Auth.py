@@ -17,16 +17,13 @@ from app.models import User
 from app.models import PasswordResetToken
 from app.schemas import Token, UserCreate
 from app.schemas import VerificationRequest
-from app.services import auth_service
+
 from app.services import EmailService
 from app.services import PasswordResetService
+from app.services import get_current_user
 
 from fastapi import Form
 from fastapi import APIRouter
-
-router = APIRouter()
-
-
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -351,7 +348,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.post("/logout")
-async def logout(current_user: User = Depends(auth_service.get_current_user)):
+async def logout(current_user: User = Depends(get_current_user)):
     """
     Logout endpoint.
     
@@ -627,16 +624,7 @@ async def reset_password_submit(request: Request, db: Session = Depends(get_db))
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while resetting password"
         )
-from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-    
 
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Union

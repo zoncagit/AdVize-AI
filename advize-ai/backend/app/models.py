@@ -121,3 +121,13 @@ class NotificationPreference(Base):
     enabled = Column(Boolean, default=True, nullable=False)
 
     user = relationship("User", back_populates="notification_pref")
+
+class PasswordResetToken(Base):
+    __tablename__ = "PASSWORD_RESET_TOKEN"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("USER.id"), nullable=False)
+    token = Column(String, unique=True, nullable=False, index=True)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Boolean, default=False, nullable=False)
+
+    user = relationship("User", back_populates="password_reset_tokens")
