@@ -1,2 +1,2 @@
 # AdVize-AI
-Ai Social Media M
+Ai Social Media Marketing tool
