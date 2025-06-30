@@ -26,13 +26,15 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
-    full_name = Column(String)
+    firstname = Column(String, nullable=False)
+    lastname = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     oauth_credential = relationship("OAuthCredential", back_populates="user", uselist=False)
     ad_accounts = relationship("AdAccount", back_populates="user")
     chat_sessions = relationship("ChatSession", back_populates="user")
     notification_pref = relationship("NotificationPreference", back_populates="user", uselist=False)
+    password_reset_tokens = relationship("PasswordResetToken", back_populates="user")
 
 class OAuthCredential(Base):
     __tablename__ = "OAUTH_CREDENTIAL"

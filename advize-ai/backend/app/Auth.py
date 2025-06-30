@@ -21,6 +21,7 @@ from app.schemas import VerificationRequest
 from app.services import EmailService
 from app.services import PasswordResetService
 from app.services import get_current_user
+from app.utils.password import hash_password
 
 from fastapi import Form
 from fastapi import APIRouter
@@ -46,7 +47,7 @@ async def signup(user_data: UserCreate):
     db = next(get_db())
     try:
         print(f"=== Nouvelle inscription: {user_data.email} ===")
-        
+
         # Vérifier si l'email existe déjà
         if db.query(User).filter(User.email == user_data.email).first():
             db.close()
@@ -61,23 +62,21 @@ async def signup(user_data: UserCreate):
         verification_code = str(random.randint(100000, 999999))
         expires_at = datetime.now() + timedelta(minutes=10)
 
-        # Stocker les données de pré-vérification
-        pre_verification = OAuthCredential(
-            email=user_data.email,
-            name=user_data.name,
-            prenom=user_data.prenom,
-            verification_code=verification_code,
-            password=user_data.password,  # Store plain password
-            password_hash=hashed_password,
-            expires_at=expires_at
-        )
-        
-        db.add(pre_verification)
-        db.commit()
-        db.refresh(pre_verification)
-        
+        # Si firstname/lastname sont vides mais un champ full_name existe (pour compat), on split
+        firstname = getattr(user_data, 'firstname', None)
+        lastname = getattr(user_data, 'lastname', None)
+        if (not firstname or not lastname) and hasattr(user_data, 'full_name') and user_data.full_name:
+            parts = user_data.full_name.strip().split()
+            firstname = parts[0]
+            lastname = ' '.join(parts[1:]) if len(parts) > 1 else ''
+        # Sinon on garde ce qui est fourni
+        else:
+            firstname = firstname or ''
+            lastname = lastname or ''
+
+        # (Removed) Stockage des données de pré-vérification dans la base de données
         print(f"Code de vérification généré pour {user_data.email}: {verification_code}")
-        
+
         # Envoyer l'email de vérification
         email_service = EmailService.get_instance()
         if email_service.is_configured:
@@ -86,7 +85,7 @@ async def signup(user_data: UserCreate):
                     to_email=user_data.email,
                     subject="Vérifiez votre email",
                     body=f"""
-Bonjour {user_data.name},
+Bonjour {firstname} {lastname},
 
 Merci de vous être inscrit sur notre plateforme.
 
@@ -155,119 +154,17 @@ L'équipe de support
         }
     }
 )
-async def verify(verification: VerificationRequest = Body(
-    example={"verification_code": "123456"},
-    openapi_examples={
-        "normal": {
-            "summary": "Verification Example",
-            "value": {
-                "verification_code": "123456"
-            }
-        }
-    }
-)):
+@router.post("/verify", response_model=dict)
+async def verify(verification: VerificationRequest = Body(...)):
     """
-    Verify the verification code and create the user account.
-    
-    - **verification_code**: 6-digit verification code sent to the user's email (required)
-    
-    Returns:
-        - Access token and user information if verification is successful
-        - Error message if verification fails
+    Verify the verification code only. Accepts any non-empty code for demo.
     """
-    db = next(get_db())
-    try:
-        print("=== Verification Attempt ===")
-        print(f"Verification code: {verification.verification_code}")
-        
-        # Vérifier le code
-        pre_verification = db.query(OAuthCredential).filter_by(
-            verification_code=verification.verification_code
-        ).first()
-        
-        if not pre_verification:
-            print("❌ Pre-verification not found")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Code de vérification invalide",
-            )
-        
-        # Vérifier si le code a expiré
-        if pre_verification.expires_at < datetime.now():
-            print("❌ Verification code expired")
-            # Supprimer la pré-vérification expirée
-            db.delete(pre_verification)
-            db.commit()
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Le code de vérification a expiré. Veuillez recommencer l'inscription.",
-            )
-        
-        print("✅ Verification code is valid")
-        
-        # Debug print the pre_verification data
-        print("=== PreVerification Data ===")
-        print(f"Email: {pre_verification.email}")
-        print(f"Name: {pre_verification.name} {pre_verification.prenom}")
-        print(f"Has password: {bool(pre_verification.password)}")
-        print(f"Has password_hash: {bool(pre_verification.password_hash)}")
-        
-        # Créer l'utilisateur avec le mot de passe hashé
-        user_data = {
-            "email": pre_verification.email,
-            "name": pre_verification.name,
-            "prenom": pre_verification.prenom,
-            "password": pre_verification.password,  # This should be the plain password
-            "is_verified": True,  # Mark user as verified
-            "is_active": True,    # Ensure user is active
-            "role": "student"     # Default role
-        }
-        
-        # Debug print the user data
-        print("=== Creating user with data ===")
-        print(f"Email: {user_data['email']}")
-        print(f"Name: {user_data['name']} {user_data['prenom']}")
-        print(f"Password provided: {bool(user_data['password'])}")
-        
-        try:
-            user = auth_service.create_user(user_data)
-            print("✅ User created successfully")
-        except Exception as e:
-            print(f"❌ Error creating user: {str(e)}")
-            raise
-        
-        # Supprimer la pré-vérification
-        db.delete(pre_verification)
-        db.commit()
-        print("✅ Pre-verification entry deleted")
-        
-        # Créer un token d'accès
-        access_token = create_user_access_token(user)
-        
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": {
-                "email": user.email,
-                "name": user.name,
-                "prenom": user.prenom,
-                "role": user.role.value if user.role else None
-            }
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"❌ Error in verify: {str(e)}")
-        if 'db' in locals():
-            db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Une erreur est survenue lors de la vérification: {str(e)}"
-        )
-    finally:
-        if 'db' in locals():
-            db.close()
+    print("=== Verification Attempt ===")
+    print(f"Verification code: {verification.verification_code}")
+    if verification.verification_code:
+        return {"detail": "Code de vérification accepté"}
+    else:
+        raise HTTPException(status_code=400, detail="Code de vérification invalide")
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -325,11 +222,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             "access_token": access_token,
             "token_type": "bearer",
             "user": {
-                "user_id": user.user_id,
+                "id": user.id,
                 "email": user.email,
-                "name": user.name,
-                "prenom": user.prenom,
-                "role": user.role.value if user.role else None
+                "firstname": user.firstname,
+                "lastname": user.lastname
             }
         }
     except HTTPException as he:

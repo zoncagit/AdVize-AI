@@ -5,8 +5,11 @@ import enum
 
 # --- VerificationRequest schema ---
 class VerificationRequest(BaseModel):
+    verification_code: str
     email: EmailStr
-    code: str
+    firstname: str
+    lastname: str
+    password: str
 
 # --- Token schema for authentication ---
 class Token(BaseModel):
@@ -31,7 +34,8 @@ class MessageSender(str, enum.Enum):
 # --- Schémas User ---
 class UserBase(BaseModel):
     email: EmailStr
-    full_name: Optional[str]
+    firstname: str
+    lastname: str
 
 class UserCreate(UserBase):
     password: str
