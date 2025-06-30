@@ -5,11 +5,7 @@ import enum
 
 # --- VerificationRequest schema ---
 class VerificationRequest(BaseModel):
-    verification_code: str
-    email: EmailStr
-    firstname: str
-    lastname: str
-    password: str
+    verification_code: int
 
 # --- Token schema for authentication ---
 class Token(BaseModel):

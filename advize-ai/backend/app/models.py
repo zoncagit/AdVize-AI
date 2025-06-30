@@ -21,6 +21,18 @@ class MessageSender(enum.Enum):
     ai = "ai"
 
 # Models
+
+class PreVerificationUser(Base):
+    __tablename__ = "PRE_VERIFICATION_USER"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    firstname = Column(String, nullable=False)
+    lastname = Column(String, nullable=False)
+    verification_code = Column(Integer, nullable=False)
+    code_expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 class User(Base):
     __tablename__ = "USER"
     id = Column(Integer, primary_key=True, index=True)
@@ -29,6 +41,9 @@ class User(Base):
     firstname = Column(String, nullable=False)
     lastname = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    is_active = Column(Boolean, default=False, nullable=False)
+    verification_code = Column(String, nullable=True)
+    code_expires_at = Column(DateTime, nullable=True)
 
     oauth_credential = relationship("OAuthCredential", back_populates="user", uselist=False)
     ad_accounts = relationship("AdAccount", back_populates="user")
