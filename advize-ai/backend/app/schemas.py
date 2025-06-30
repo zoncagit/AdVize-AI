@@ -45,12 +45,26 @@ class UserRead(UserBase):
 
 # --- Schémas OAuthCredential ---
 class OAuthCredentialBase(BaseModel):
-    access_token: Optional[str]
-    refresh_token: Optional[str]
-    connected_at: Optional[datetime]
+    email: EmailStr
+    access_token: str
+    refresh_token: Optional[str] = None
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    connected_at: Optional[datetime] = None
+
+class OAuthCredentialCreate(OAuthCredentialBase):
+    pass
+
+class OAuthCredentialVerify(BaseModel):
+    email: EmailStr
+    verification_code: str
+    password: str
 
 class OAuthCredentialRead(OAuthCredentialBase):
-    user_id: int
+    user_id: Optional[int]
+    is_verified: bool
+    verification_code: Optional[str] = None
+    code_expires_at: Optional[datetime] = None
 
     class Config:
         orm_mode = True

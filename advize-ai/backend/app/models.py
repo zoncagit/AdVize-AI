@@ -22,16 +22,6 @@ class MessageSender(enum.Enum):
 
 # Models
 
-class PreVerificationUser(Base):
-    __tablename__ = "PRE_VERIFICATION_USER"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    firstname = Column(String, nullable=False)
-    lastname = Column(String, nullable=False)
-    verification_code = Column(Integer, nullable=False)
-    code_expires_at = Column(DateTime, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
 
 class User(Base):
     __tablename__ = "USER"
@@ -40,25 +30,39 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     firstname = Column(String, nullable=False)
     lastname = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     is_active = Column(Boolean, default=False, nullable=False)
     verification_code = Column(String, nullable=True)
     code_expires_at = Column(DateTime, nullable=True)
 
-    oauth_credential = relationship("OAuthCredential", back_populates="user", uselist=False)
-    ad_accounts = relationship("AdAccount", back_populates="user")
-    chat_sessions = relationship("ChatSession", back_populates="user")
-    notification_pref = relationship("NotificationPreference", back_populates="user", uselist=False)
-    password_reset_tokens = relationship("PasswordResetToken", back_populates="user")
+    # Relationships
+    oauth_credential = relationship("OAuthCredential", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    ad_accounts = relationship("AdAccount", back_populates="user", cascade="all, delete-orphan")
+    chat_sessions = relationship("ChatSession", back_populates="user", cascade="all, delete-orphan")
+    notification_pref = relationship(
+        "NotificationPreference", 
+        back_populates="user", 
+        uselist=False, 
+        cascade="all, delete-orphan"
+    )
+    password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete-orphan")
 
 class OAuthCredential(Base):
     __tablename__ = "OAUTH_CREDENTIAL"
-    user_id = Column(Integer, ForeignKey("USER.id"), primary_key=True)
-    access_token = Column(String)
-    refresh_token = Column(String)
-    connected_at = Column(DateTime, default=datetime.utcnow)
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("USER.id", ondelete='CASCADE'), nullable=True, unique=True)
+    email = Column(String, unique=True, nullable=False)
+    firstname = Column(String, nullable=True)
+    lastname = Column(String, nullable=True)
+    password_hash = Column(String, nullable=True)
+    verification_code = Column(String, nullable=True)
+    code_expires_at = Column(DateTime, nullable=True)
+    access_token = Column(String, nullable=True)
+    refresh_token = Column(String, nullable=True)
+    connected_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
 
-    user = relationship("User", back_populates="oauth_credential")
+    user = relationship("User", back_populates="oauth_credential", uselist=False)
 
 class AdAccount(Base):
     __tablename__ = "AD_ACCOUNT"

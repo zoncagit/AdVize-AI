@@ -4,6 +4,7 @@ from app.database import engine, Base
 from app import models  # pour que Base connaisse tous les modèles
 from app.Auth import router as AuthRouter
 
+
 # Crée les tables si besoin
 Base.metadata.create_all(bind=engine)
 

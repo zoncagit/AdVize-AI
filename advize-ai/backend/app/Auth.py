@@ -1,38 +1,69 @@
 from datetime import datetime, timedelta
 import logging
+import os
 import random
 import secrets
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.responses import HTMLResponse
+from fastapi import (
+    APIRouter, Body, Depends, Form, HTTPException, Request, Response,
+    Security, status
+)
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, SecurityScopes
+from fastapi.responses import HTMLResponse, JSONResponse
+from jose import JWTError, jwt
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
-from pydantic import BaseModel, EmailStr
 
 from app.database import get_db
-from app.models import OAuthCredential
-from app.models import User
-from app.models import PasswordResetToken
-from app.models import PreVerificationUser
-from app.schemas import Token, UserCreate
-from app.schemas import VerificationRequest
-
-from app.services import EmailService
-from app.services import PasswordResetService
-from app.services import get_current_user
+from app import models, schemas
+from app.models import OAuthCredential, User, PasswordResetToken
+from app.schemas import Token, UserCreate, OAuthCredentialCreate, OAuthCredentialVerify, VerificationRequest
+from app.cruds import (
+    create_oauth_credential, verify_oauth_credential,
+    update_oauth_credential_after_verification, create_user,
+    get_user_by_email
+)
+from app.services import EmailService, PasswordResetService
 from app.utils.password import hash_password, verify_password
-
-from fastapi import Form
-from fastapi import APIRouter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# JWT Configuration
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# OAuth2 scheme for token authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Create a JWT access token with the provided data.
+    
+    Args:
+        data: Dictionary containing the data to encode in the token
+        expires_delta: Optional timedelta for token expiration
+        
+    Returns:
+        str: Encoded JWT token
+    """
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
 # Create router with auth prefix and tags
 router = APIRouter(prefix="", tags=["Authentication"])
+
+# ===== Request/Response Models =====
 
 class ResetPasswordRequest(BaseModel):
     email: EmailStr
@@ -42,79 +73,185 @@ class VerifyCodeRequest(BaseModel):
     verification_code: str
     new_password: str
 
+class OAuthSignupResponse(BaseModel):
+    message: str
+    email: str
+    verification_required: bool = True
+
+# OAuth2 scheme
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/auth/login",
+    scopes={
+        "student": "Read access to student resources",
+        "teacher": "Read and write access to teacher resources",
+        "admin": "Admin access"
+    }
+)
+
+# ===== Authentication Functions =====
+
+def get_current_user(security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """
+    Get the current user from the token and verify required scopes.
+    """
+    if security_scopes.scopes:
+        authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
+    else:
+        authenticate_value = 'Bearer'
+    
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": authenticate_value},
+    )
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+        token_scopes = payload.get("scopes", [])
+        token_data = {"sub": user_id, "scopes": token_scopes}
+    except (JWTError, ValidationError):
+        raise credentials_exception
+    
+    user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+    if user is None:
+        raise credentials_exception
+    
+    # Verify scopes if any are required
+    if security_scopes.scopes:
+        for scope in security_scopes.scopes:
+            if scope not in token_data["scopes"]:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not enough permissions",
+                    headers={"WWW-Authenticate": authenticate_value},
+                )
+    
+    return user
+
+def get_current_active_user(current_user: models.User = Security(get_current_user, scopes=[])):
+    """
+    Get the current active user (no specific scopes required).
+    """
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+def get_current_user_payload(token: str = Depends(oauth2_scheme)):
+    """
+    Get the current user's payload from the token.
+    
+    Args:
+        token: JWT token from the Authorization header
+        
+    Returns:
+        Dict: Decoded token payload
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+# ===== OAuth Endpoints =====
+
 @router.post("/signup")
 async def signup(user_data: UserCreate):
-    """Crée un nouvel utilisateur avec vérification automatique"""
+    """Create a new user with email verification"""
     db = next(get_db())
     try:
-        print(f"=== Nouvelle inscription: {user_data.email} ===")
+        print(f"=== New signup: {user_data.email} ===")
 
-        # Vérifier si l'email existe déjà
-        if db.query(User).filter(User.email == user_data.email).first() or db.query(PreVerificationUser).filter(PreVerificationUser.email == user_data.email).first():
+        # Check if email already exists
+        if db.query(User).filter(User.email == user_data.email).first():
             db.close()
-            raise HTTPException(status_code=400, detail="Cette adresse email est déjà utilisée")
+            raise HTTPException(status_code=400, detail="Email already registered")
+            
+        # Check if there's already an OAuth credential with this email
+        existing_oauth = db.query(OAuthCredential).filter(OAuthCredential.email == user_data.email).first()
+        if existing_oauth and existing_oauth.is_verified:
+            db.close()
+            raise HTTPException(status_code=400, detail="Email already registered")
 
-        # Hasher le mot de passe
-        print("Hachage du mot de passe...")
+        # Hash the password
+        print("Hashing password...")
         hashed_password = hash_password(user_data.password)
-        print(f"Mot de passe haché: {hashed_password}")
+        print(f"Hashed password: {hashed_password}")
 
-        # Créer un code de vérification (stored as string in database)
+        # Generate verification code
         verification_code = ''.join(secrets.choice('0123456789') for _ in range(6))
-        expires_at = datetime.now() + timedelta(minutes=10)
+        expires_at = datetime.utcnow() + timedelta(minutes=10)
 
-        # Si firstname/lastname sont vides mais un champ full_name existe (pour compat), on split
-        firstname = getattr(user_data, 'firstname', None)
-        lastname = getattr(user_data, 'lastname', None)
+        # Get firstname and lastname
+        firstname = getattr(user_data, 'firstname', '')
+        lastname = getattr(user_data, 'lastname', '')
+        
         if (not firstname or not lastname) and hasattr(user_data, 'full_name') and user_data.full_name:
             parts = user_data.full_name.strip().split()
             firstname = parts[0]
             lastname = ' '.join(parts[1:]) if len(parts) > 1 else ''
-        # Sinon on garde ce qui est fourni
-        else:
-            firstname = firstname or ''
-            lastname = lastname or ''
 
-        # Stockage des données de pré-vérification dans la base de données
-        pre_user = PreVerificationUser(
-            email=user_data.email,
-            password_hash=hashed_password,
-            firstname=firstname,
-            lastname=lastname,
-            verification_code=verification_code,
-            code_expires_at=expires_at
-        )
-        db.add(pre_user)
+        # Store in OAuthCredential table with verification code
+        if existing_oauth:
+            # Update existing unverified credential
+            existing_oauth.password_hash = hashed_password
+            existing_oauth.firstname = firstname
+            existing_oauth.lastname = lastname
+            existing_oauth.verification_code = verification_code
+            existing_oauth.code_expires_at = expires_at
+            existing_oauth.is_verified = False
+            oauth_cred = existing_oauth
+        else:
+            # Create new OAuth credential
+            oauth_cred = OAuthCredential(
+                email=user_data.email,
+                password_hash=hashed_password,
+                firstname=firstname,
+                lastname=lastname,
+                verification_code=verification_code,
+                code_expires_at=expires_at,
+                is_verified=False,
+                access_token="",  # Will be set after verification
+                refresh_token=None
+            )
+            db.add(oauth_cred)
+        
         db.commit()
 
-        print(f"Code de vérification généré pour {user_data.email}: {verification_code}")
+        print(f"Verification code generated for {user_data.email}: {verification_code}")
 
-        # Envoyer l'email de vérification
+        # Send verification email
         email_service = EmailService.get_instance()
         if email_service.is_configured:
             try:
                 email_service.send_email(
                     to_email=user_data.email,
-                    subject="Vérifiez votre email",
+                    subject="Verify Your Email",
                     body=f"""
-Bonjour {firstname} {lastname},
+Hello {firstname} {lastname},
 
-Merci de vous être inscrit sur notre plateforme.
+Thank you for signing up to our platform.
 
-Votre code de vérification est : {verification_code}
+Your verification code is: {verification_code}
 
-Ce code expirera dans 10 minutes.
+This code will expire in 10 minutes.
 
-Cordialement,
-L'équipe de support
+Best regards,
+Support Team
 """
                 )
-                print("Email de vérification envoyé")
+                print("Verification email sent")
             except Exception as email_error:
-                print(f"Erreur lors de l'envoi de l'email de vérification: {str(email_error)}")
+                print(f"Error sending verification email: {str(email_error)}")
 
         return {
-            "detail": "Email de vérification envoyé",
+            "detail": "Verification email sent",
             "next_step": "/verify",
             "email": user_data.email,
             "verification_code": verification_code  # Only for testing, remove in production
@@ -148,12 +285,15 @@ L'équipe de support
                     "example": {
                         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                         "token_type": "bearer",
+                        "expires_in": 1800,
                         "user": {
+                            "id": 1,
                             "email": "user@example.com",
-                            "name": "John",
-                            "prenom": "Doe",
-                            "role": "student"
-                        }
+                            "firstname": "John",
+                            "lastname": "Doe",
+                            "is_active": True
+                        },
+                        "message": "User verified and registered successfully."
                     }
                 }
             }
@@ -169,37 +309,87 @@ L'équipe de support
 @router.post("/verify", response_model=dict)
 async def verify(verification: VerificationRequest = Body(...)):
     """
-    Verify the code only. If valid, move user from PreVerificationUser to User.
+    Verify the user's verification code and create their account.
     """
     db = next(get_db())
     try:
-        # Convert verification code to string for comparison since it's stored as string in the database
-        verification_code_str = str(verification.verification_code)
-        pre_user = db.query(PreVerificationUser).filter(PreVerificationUser.verification_code == verification_code_str).first()
-        if not pre_user:
-            raise HTTPException(status_code=404, detail="Invalid or expired verification code.")
-        if pre_user.code_expires_at < datetime.utcnow():
-            db.delete(pre_user)
+        # Find the OAuth credential with the matching email and verification code
+        oauth_cred = db.query(OAuthCredential).filter(
+            OAuthCredential.email == verification.email,
+            OAuthCredential.verification_code == str(verification.verification_code)
+        ).first()
+        
+        if not oauth_cred:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired verification code."
+            )
+            
+        # Check if code is expired
+        if oauth_cred.code_expires_at < datetime.utcnow():
+            db.delete(oauth_cred)
             db.commit()
-            raise HTTPException(status_code=400, detail="Verification code expired. Please sign up again.")
-        # Double-check email not already in User
-        if db.query(User).filter(User.email == pre_user.email).first():
-            db.delete(pre_user)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verification code expired. Please sign up again."
+            )
+            
+        # Check if user already exists (shouldn't happen due to previous checks)
+        existing_user = db.query(User).filter(User.email == verification.email).first()
+        if existing_user:
+            # Clean up the OAuth credential since user already exists
+            db.delete(oauth_cred)
             db.commit()
-            raise HTTPException(status_code=400, detail="Email already registered. Please log in.")
-        # Create user
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered. Please log in."
+            )
+            
+        # Create the user
         user = User(
-            email=pre_user.email,
-            password_hash=pre_user.password_hash,
-            firstname=pre_user.firstname,
-            lastname=pre_user.lastname,
+            email=oauth_cred.email,
+            password_hash=oauth_cred.password_hash,
+            firstname=oauth_cred.firstname or "",
+            lastname=oauth_cred.lastname or "",
             is_active=True,
             created_at=datetime.utcnow()
         )
         db.add(user)
-        db.delete(pre_user)
+        db.flush()  # Flush to get the user ID
+        
+        # Update OAuth credential with user ID and mark as verified
+        oauth_cred.user_id = user.id
+        oauth_cred.is_verified = True
+        oauth_cred.verification_code = None
+        oauth_cred.code_expires_at = None
+        
+        # Generate access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": str(user.id)},
+            expires_delta=access_token_expires
+        )
+        
+        # Update OAuth credential with access token
+        oauth_cred.access_token = access_token
+        
         db.commit()
-        return {"message": "User verified and registered successfully."}
+        
+        # Return token and user info
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "expires_in": int(access_token_expires.total_seconds()),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "is_active": user.is_active
+            },
+            "message": "User verified and registered successfully."
+        }
+        
     except HTTPException as he:
         db.rollback()
         raise he
@@ -207,7 +397,7 @@ async def verify(verification: VerificationRequest = Body(...)):
         db.rollback()
         print(f"Erreur lors de la vérification: {str(e)}")
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Une erreur est survenue lors de la vérification: {str(e)}"
         )
     finally:
@@ -226,7 +416,34 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         print("=== Login Attempt ===")
         print(f"Email: {form_data.username}")
         
-        # Find user by email (username in OAuth2PasswordRequestForm is the email)
+        # First check if there's an unverified OAuth credential
+        oauth_cred = db.query(OAuthCredential).filter(
+            OAuthCredential.email == form_data.username,
+            OAuthCredential.is_verified == False
+        ).first()
+        
+        if oauth_cred:
+            # If there's an unverified credential, check if the password matches
+            if not verify_password(form_data.password, oauth_cred.password_hash):
+                print("❌ Invalid email or password")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Incorrect email or password",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            
+            # If password matches but email not verified
+            print("❌ Email not verified")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "Please verify your email before logging in. "
+                    "Check your email for the verification code or request a new one."
+                ),
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # If no unverified credential, check regular user
         user = db.query(User).filter(User.email == form_data.username).first()
         
         # Verify user exists and password is correct
@@ -243,36 +460,43 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             print("❌ Inactive user")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Inactive user"
-            )
-            
-        # Check if user is verified
-        if not user.is_verified:
-            print("❌ Email not verified")
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Please verify your email before logging in. Check your email for the verification code.",
-                headers={"WWW-Authenticate": "Bearer"},
+                detail="This account has been deactivated. Please contact support."
             )
         
         # Update last login timestamp
         print("✅ User authenticated, updating last login")
-        user.last_login = func.now()
+        user.last_login = datetime.utcnow()
         db.commit()
         db.refresh(user)
         
-        # Create access token with appropriate scopes based on user role
-        access_token = create_user_access_token(user)
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": str(user.id)},
+            expires_delta=access_token_expires
+        )
+        
+        # Update OAuth credential with new access token if exists
+        oauth_cred = db.query(OAuthCredential).filter(
+            OAuthCredential.user_id == user.id
+        ).first()
+        
+        if oauth_cred:
+            oauth_cred.access_token = access_token
+            db.commit()
+        
         print("✅ Access token created")
         
         return {
             "access_token": access_token,
             "token_type": "bearer",
+            "expires_in": int(access_token_expires.total_seconds()),
             "user": {
                 "id": user.id,
                 "email": user.email,
                 "firstname": user.firstname,
-                "lastname": user.lastname
+                "lastname": user.lastname,
+                "is_active": user.is_active
             }
         }
     except HTTPException as he:
@@ -567,201 +791,3 @@ async def reset_password_submit(request: Request, db: Session = Depends(get_db))
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while resetting password"
         )
-
-
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union
-from jose import jwt, JWTError
-from fastapi import HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordBearer
-
-from app.config import database_settings
-from app.models import User
-
-# Use settings from database configuration
-settings = database_settings
-SECRET_KEY = settings.secret_key
-ALGORITHM = settings.algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
-
-def create_access_token(
-    data: dict,
-    expires_delta: Optional[timedelta] = None
-) -> str:
-    """
-    Create a JWT token with the given data.
-    
-    Args:
-        data: Dictionary containing the data to encode in the token
-        expires_delta: Optional timedelta for token expiration
-        
-    Returns:
-        str: Encoded JWT token
-    """
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-def create_user_access_token(user: User) -> str:
-   
-    
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    return create_access_token(
-        data={
-            "sub": str(user.user_id),
-            "email": user.email,
-            
-        },
-        expires_delta=access_token_expires
-    )
-
-def verify_access_token(token: str) -> Dict:
-    """
-    Verify and decode a JWT token.
-    
-    Args:
-        token: JWT token to verify
-        
-    Returns:
-        Dict: Decoded token payload
-        
-    Raises:
-        HTTPException: If token is invalid or expired
-    """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    
-    try:
-        # Remove 'Bearer ' prefix if present
-        if token.startswith('Bearer '):
-            token = token[7:]
-            
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-        return payload
-    except JWTError:
-        raise credentials_exception
-
-def get_user_id_from_token(token: str) -> int:
-    """
-    Extract the user ID from a JWT token.
-    
-    Args:
-        token: JWT token string
-        
-    Returns:
-        int: User ID from the token
-        
-    Raises:
-        HTTPException: If token is invalid or doesn't contain a user ID
-    """
-    try:
-        payload = verify_access_token(token)
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        return int(user_id)
-    except (JWTError, ValueError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-def get_current_user_payload(token: str = Depends(OAuth2PasswordBearer(tokenUrl="login"))) -> Dict:
-    """
-    Get the current user's payload from the token.
-    
-    Args:
-        token: JWT token from the Authorization header
-        
-    Returns:
-        Dict: Decoded token payload
-    """
-    return verify_access_token(token)
-
-from typing import List, Optional
-from fastapi import Depends, HTTPException, Security, status
-from fastapi.security import OAuth2PasswordBearer, SecurityScopes
-from jose import JWTError
-from pydantic import ValidationError
-from sqlalchemy.orm import Session
-
-from app import models
-from app.database import get_db
-
-# OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/login",
-    scopes={
-        "student": "Read access to student resources",
-        "teacher": "Read and write access to teacher resources",
-        "admin": "Admin access"
-    }
-)
-
-def get_current_user(
-    security_scopes: SecurityScopes,
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-):
-    """
-    Get the current user from the token and verify required scopes.
-    """
-    if security_scopes.scopes:
-        authenticate_value = f'Bearer scope=\"{security_scopes.scope_str}\"'
-    else:
-        authenticate_value = "Bearer"
-
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": authenticate_value},
-    )
-
-    try:
-        payload = verify_access_token(token)
-        user_id: str = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-        token_scopes = payload.get("scopes", [])
-        token_data = {"sub": user_id, "scopes": token_scopes}
-    except (JWTError, ValidationError):
-        raise credentials_exception
-
-    user = db.query(models.User).filter(models.User.user_id == int(user_id)).first()
-    if user is None:
-        raise credentials_exception
-
-    # Check scopes
-    for scope in security_scopes.scopes:
-        if scope not in token_scopes:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not enough permissions",
-                headers={"WWW-Authenticate": authenticate_value},
-            )
-
-    return user
-
-def get_current_active_user(
-    current_user: models.User = Security(get_current_user, scopes=[])
-) -> models.User:
-    """
-    Get the current active user (no specific scopes required).
-    """
-    return current_user

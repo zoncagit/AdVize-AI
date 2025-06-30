@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
+from datetime import datetime, timedelta
+import secrets
 from . import models, schemas
-from Auth import get_password_hash
+from .utils.password import hash_password, verify_password
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
@@ -8,7 +11,7 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 def create_user(db: Session, user: schemas.UserCreate):
-    hashed_pw = get_password_hash(user.password)
+    hashed_pw = hash_password(user.password)
     db_user = models.User(email=user.email, password_hash=hashed_pw, firstname=user.firstname, lastname=user.lastname)
     db.add(db_user)
     db.commit()
@@ -17,6 +20,72 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 def get_oauth(db: Session, user_id: int):
     return db.query(models.OAuthCredential).filter(models.OAuthCredential.user_id == user_id).first()
+
+def get_oauth_by_email(db: Session, email: str):
+    return db.query(models.OAuthCredential).filter(models.OAuthCredential.email == email).first()
+
+def create_oauth_credential(
+    db: Session, 
+    email: str, 
+    access_token: str, 
+    refresh_token: str = None,
+    firstname: str = None,
+    lastname: str = None
+):
+    # Delete any existing credentials for this email
+    db.query(models.OAuthCredential).filter(
+        models.OAuthCredential.email == email
+    ).delete()
+    
+    # Generate a 6-digit verification code
+    verification_code = ''.join(secrets.choice('0123456789') for _ in range(6))
+    expires_at = datetime.utcnow() + timedelta(minutes=30)  # 30 minutes to verify
+    
+    # Create new credential
+    db_oauth = models.OAuthCredential(
+        email=email,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        firstname=firstname,
+        lastname=lastname,
+        verification_code=verification_code,
+        code_expires_at=expires_at,
+        is_verified=False
+    )
+    
+    db.add(db_oauth)
+    db.commit()
+    db.refresh(db_oauth)
+    return db_oauth
+
+def verify_oauth_credential(
+    db: Session,
+    email: str,
+    verification_code: str
+):
+    return db.query(models.OAuthCredential).filter(
+        and_(
+            models.OAuthCredential.email == email,
+            models.OAuthCredential.verification_code == verification_code,
+            models.OAuthCredential.code_expires_at > datetime.utcnow(),
+            models.OAuthCredential.is_verified == False
+        )
+    ).first()
+
+def update_oauth_credential_after_verification(
+    db: Session,
+    oauth_cred: models.OAuthCredential,
+    user_id: int,
+    password_hash: str
+):
+    oauth_cred.user_id = user_id
+    oauth_cred.password_hash = password_hash
+    oauth_cred.is_verified = True
+    oauth_cred.verification_code = None
+    oauth_cred.code_expires_at = None
+    db.commit()
+    db.refresh(oauth_cred)
+    return oauth_cred
 
 def upsert_oauth(db: Session, user_id: int, oauth: schemas.OAuthCredentialBase):
     db_oauth = get_oauth(db, user_id)
