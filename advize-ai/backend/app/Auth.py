@@ -22,7 +22,7 @@ from app.schemas import VerificationRequest
 from app.services import EmailService
 from app.services import PasswordResetService
 from app.services import get_current_user
-from app.utils.password import hash_password
+from app.utils.password import hash_password, verify_password
 
 from fastapi import Form
 from fastapi import APIRouter
@@ -59,8 +59,8 @@ async def signup(user_data: UserCreate):
         hashed_password = hash_password(user_data.password)
         print(f"Mot de passe haché: {hashed_password}")
 
-        # Créer un code de vérification
-        verification_code = int(''.join(secrets.choice('0123456789') for _ in range(6)))
+        # Créer un code de vérification (stored as string in database)
+        verification_code = ''.join(secrets.choice('0123456789') for _ in range(6))
         expires_at = datetime.now() + timedelta(minutes=10)
 
         # Si firstname/lastname sont vides mais un champ full_name existe (pour compat), on split
@@ -173,7 +173,9 @@ async def verify(verification: VerificationRequest = Body(...)):
     """
     db = next(get_db())
     try:
-        pre_user = db.query(PreVerificationUser).filter(PreVerificationUser.verification_code == int(verification.verification_code)).first()
+        # Convert verification code to string for comparison since it's stored as string in the database
+        verification_code_str = str(verification.verification_code)
+        pre_user = db.query(PreVerificationUser).filter(PreVerificationUser.verification_code == verification_code_str).first()
         if not pre_user:
             raise HTTPException(status_code=404, detail="Invalid or expired verification code.")
         if pre_user.code_expires_at < datetime.utcnow():
