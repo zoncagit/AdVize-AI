@@ -30,7 +30,7 @@ Tech Stack
 
 | Layer        | Technologies |
 |--------------|--------------|
-| Frontend     | React, TypeScript, Tailwind CSS, shadcn/ui, lucide-react |
+| Frontend     | HTML, TypeScript, Tailwind CSS, shadcn/ui, lucide-react |
 | Backend      | FastAPI (Python), OAuth, REST APIs |
 | AI Layer     | RAG (Retrieval-Augmented Generation) |
 | Auth         | Google OAuth, Facebook Login |
