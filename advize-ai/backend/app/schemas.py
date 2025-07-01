@@ -2,6 +2,16 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime, date
 from typing import Optional, List
 import enum
+# app/schemas/dashboard_schema.py
+
+from pydantic import BaseModel
+
+class DashboardMetricsResponse(BaseModel):
+    total_spend: float
+    total_clicks: int
+    total_impressions: int
+    total_purchases: float
+
 
 # --- VerificationRequest schema ---
 class VerificationRequest(BaseModel):
@@ -182,6 +192,21 @@ class NotificationPreferenceCreate(NotificationPreferenceBase):
 class NotificationPreferenceRead(NotificationPreferenceBase):
     id: int
     user_id: int
+
+    class Config:
+        orm_mode = True
+# app/schemas/user_schema.py
+
+from pydantic import BaseModel
+from datetime import datetime
+
+class UserProfileResponse(BaseModel):
+    id: int
+    email: str
+    firstname: str
+    lastname: str
+    created_at: datetime
+    is_active: bool
 
     class Config:
         orm_mode = True
