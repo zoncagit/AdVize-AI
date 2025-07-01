@@ -1184,7 +1184,8 @@
     <section id="login-section" class="view-section hidden container mx-auto px-4">
         <div class="max-w-md mx-auto">
             <div class=" metric-card rounded-xl p-8 mt-20">
-                <div class="space-y-4">
+                <div class="space-y-5
+                ">
                     <div class="text-center space-y-2">
                         <h2 class="text-3xl font-bold text-white">Get Started</h2>
                         <p class="text-gray-400">Create your account and start optimizing</p>
@@ -1220,6 +1221,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
                             Back to Home
+                        </button>
+                        <button id="login-success" class="w-full bg-blue-600 text-white hover:bg-blue-700 py-3 rounded-lg transition duration-200">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            log in 
                         </button>
                     </div>  
                 </div>
@@ -1296,7 +1303,7 @@
         const signupButtonn = document.getElementById('nav-Signup');
         const resetPasswordButton = document.getElementById('nav-resetpassword');
         const codeButton = document.getElementById('nav-verefication');
-        
+        const loginSuccess = document.getElementById('login-success');
 
         
 
@@ -1361,6 +1368,7 @@
         signupButtonn.addEventListener('click', () => showSection('signup'));
         resetPasswordButton.addEventListener('click', () => showSection('resetpassword'));
         codeButton.addEventListener('click', () => showSection('verification'));
+        loginSuccess.addEventListener('click', () => showSection('login-success'));
 
         // Initialize with hero section
         showSection('hero');

@@ -1,6 +1,6 @@
 # app/main.py
 import uuid
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, HTTPException, status, Request, Query
 import app.cruds as cruds
 from app import models
 from fastapi.responses import JSONResponse
@@ -21,6 +21,7 @@ from app.schemas import UserProfileResponse
 # app/routers/dashboard_router.py
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app.Auth import get_current_user
 from app.database import get_db
@@ -34,6 +35,15 @@ app = FastAPI(
     title="AdsAi API",
     description="Backend FastAPI pour AdsAi",
     version="1.0.0",
+)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For development only, replace with your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include auth router
@@ -1338,28 +1348,252 @@ async def get_quick_questions(
 
 
 
-# ===== Facebook (Meta) Integration Routes =====
-@app.get("/facebook/connect")
-async def connect_facebook_ads():
-    """Initiate Facebook OAuth flow"""
-    # Implementation here
-    pass
+
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+@app.get("/facebook/connect", response_model=dict[str, str])
+async def connect_facebook_ads() -> dict[str, str]:
+    """
+    Initiate Facebook OAuth flow
+    
+    Redirects user to Facebook's OAuth dialog to grant permissions
+    """
+    try:
+        # Get environment variables
+        client_id = os.getenv("FB_CLIENT_ID")
+        redirect_uri = os.getenv("FB_REDIRECT_URI")
+        
+        # Validate required environment variables
+        if not client_id or not redirect_uri:
+            missing = []
+            if not client_id:
+                missing.append("FB_CLIENT_ID")
+            if not redirect_uri:
+                missing.append("FB_REDIRECT_URI")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Missing required environment variables: {', '.join(missing)}"
+            )
+        
+        # Define required permissions
+        scope = "ads_read,ads_management,business_management"
+        
+        # Build authorization URL
+        url = (
+            f"https://www.facebook.com/v23.0/dialog/oauth"
+            f"?client_id={client_id}"
+            f"&redirect_uri={redirect_uri}"
+            f"&scope={scope}"
+            f"&response_type=code"
+        )
+        
+        logger.info(f"Generated Facebook OAuth URL: {url}")
+        return {"auth_url": url}
+        
+    except Exception as e:
+        logger.error(f"Error in Facebook connect: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to initiate Facebook OAuth: {str(e)}"
+        )
+
 
 @app.get("/facebook/callback")
 async def facebook_callback(request: Request):
-    """Handle Facebook OAuth callback"""
-    # Implementation here
-    pass
+    code = request.query_params.get("code")
+    if not code:
+        raise HTTPException(status_code=400, detail="Missing code")
+    ## DIRHOM F ENV
+    client_id = os.getenv("FB_CLIENT_ID") #752714857280409
+    client_secret = os.getenv("FB_CLIENT_SECRET") #201effbef7b2480b1c355ee9eb5d6182
+    redirect_uri = os.getenv("FB_REDIRECT_URI") #http://LOCALHOSTTAEK/facebook/callback
+
+
+    token_url = "https://graph.facebook.com/v23.0/oauth/access_token"
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "client_secret": client_secret,
+        "code": code
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(token_url, params=params)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+
+    access_token = response.json()["access_token"]
+
+    # Now use token to fetch connected ad accounts
+    ad_accounts_url = "https://graph.facebook.com/v23.0/me/adaccounts"
+    ad_params = {"fields": "id,name", "access_token": access_token}
+
+    async with httpx.AsyncClient() as client:
+        ad_response = await client.get(ad_accounts_url, params=ad_params)
+
+    if ad_response.status_code != 200:
+        raise HTTPException(status_code=ad_response.status_code, detail=ad_response.text)
+
+    return {
+        "access_token": access_token,
+        "ad_accounts": ad_response.json().get("data", [])
+    }
+
+
+# AD ACCOUNTS 
+
 
 @app.get("/facebook/adaccounts")
-async def get_facebook_ad_accounts(access_token: str):
-    # Implementation for getting Facebook ad accounts
-    pass
+async def get_ad_accounts(access_token: str = Query(..., description="Facebook access token with ads_read permission")):
+    """
+    Get all ad accounts associated with the authenticated Facebook user
+    
+    Requires a valid Facebook access token with the 'ads_read' permission
+    """
+    try:
+        logger.info("Fetching Facebook ad accounts")
+        
+        if not access_token or access_token == "11":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A valid Facebook access token is required"
+            )
+            
+        url = "https://graph.facebook.com/v23.0/me/adaccounts"
+        params = {
+            "fields": "id,name,account_id,account_status,currency,business_name,business_id",
+            "access_token": access_token
+        }
 
+        logger.debug(f"Making request to Facebook Graph API: {url} with params: {params}")
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(url, params=params)
+            response_data = response.json()
+            
+            logger.debug(f"Facebook API response status: {response.status_code}")
+            logger.debug(f"Facebook API response data: {response_data}")
+            
+            if response.status_code != 200:
+                error_message = response_data.get('error', {}).get('message', 'Unknown error')
+                error_type = response_data.get('error', {}).get('type', 'Unknown')
+                error_code = response_data.get('error', {}).get('code', 0)
+                
+                logger.error(
+                    f"Facebook API error: {error_message} (Type: {error_type}, Code: {error_code})"
+                )
+                
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={
+                        "message": "Failed to fetch ad accounts from Facebook",
+                        "error": error_message,
+                        "type": error_type,
+                        "code": error_code
+                    }
+                )
+                
+        logger.info(f"Successfully retrieved {len(response_data.get('data', []))} ad accounts")
+        return response_data
+        
+    except httpx.RequestError as e:
+        logger.error(f"Request to Facebook API failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Unable to connect to Facebook API. Please try again later."
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in get_ad_accounts: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while processing your request"
+        )
+
+
+    # CAMPAIGNS and INSIGHTS
 @app.get("/facebook/campaigns")
-async def get_facebook_campaigns(access_token: str, ad_account_id: str):
-    """Get Facebook campaigns and KPIs"""
-    # Implementation here
-    pass
+async def get_campaigns_and_kpis(
+    access_token: str = Query(...),
+    ad_account_id: str = Query(...),
+):
+    # Remove "act_" prefix if present
+    if not ad_account_id.startswith("act_"):
+        ad_account_id = f"act_{ad_account_id}"
+
+    campaigns_url = f"https://graph.facebook.com/v23.0/{ad_account_id}/campaigns"
+    campaigns_params = {
+        "fields": "id,name,status,effective_status,objective",
+        "access_token": access_token
+    }
+
+    async with httpx.AsyncClient() as client:
+        campaigns_res = await client.get(campaigns_url, params=campaigns_params)
+
+        if campaigns_res.status_code != 200:
+            raise HTTPException(status_code=campaigns_res.status_code, detail=campaigns_res.text)
+
+        campaigns = campaigns_res.json().get("data", [])
+
+        results = []
+        for campaign in campaigns:
+            campaign_id = campaign["id"]
+            insights_url = f"https://graph.facebook.com/v23.0/{campaign_id}/insights"
+            insights_params = {
+                "fields": "spend,impressions,clicks,ctr,cpc,roas,purchase",
+                "access_token": access_token,
+                "date_preset": "last_7d"
+            }
+            insights_res = await client.get(insights_url, params=insights_params)
+
+            insights_data = (
+                insights_res.json().get("data", [{}])[0]
+                if insights_res.status_code == 200 else {}
+            )
+
+            results.append({
+                "id": campaign_id,
+                "name": campaign.get("name"),
+                "status": campaign.get("status"),
+                "objective": campaign.get("objective"),
+                "kpis": insights_data
+            })
+
+    return results
+# Create CAMPAIGN 
+class CampaignCreateRequest(BaseModel):
+    access_token: str
+    ad_account_id: str 
+    name: str
+    status: str = "PAUSED"
+    objective: str
+
+
+@app.post("/facebook/campaigns")
+async def create_campaign(payload: CampaignCreateRequest):
+    ad_account_id = f"{payload.ad_account_id}"
+    url = f"https://graph.facebook.com/v23.0/{ad_account_id}/campaigns"
+    params = {
+        "access_token": payload.access_token
+    }
+    data = {
+
+        "name": payload.name,
+        "status": payload.status,
+        # VALID STATUS OUTCOME_LEADS, OUTCOME_SALES, OUTCOME_ENGAGEMENT, OUTCOME_AWARENESS, OUTCOME_TRAFFIC, OUTCOME_APP_PROMOTION.
+        "objective": payload.objective,
+        "special_ad_categories": "[]"
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, params=params, data=data)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+
+    return response.json()
 
 
