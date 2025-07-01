@@ -1596,4 +1596,56 @@ async def create_campaign(payload: CampaignCreateRequest):
 
     return response.json()
 
+@app.put("/api/users/profile")
+async def update_user_profile(
+    profile_data: Dict[str, Any],
+    current_user: models.User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, str]:
+    """Update user profile"""
 
+    # Step 1: Retrieve the current user from DB
+    user = db.query(models.User).filter(models.User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Step 2: Update only the provided fields
+   
+    if "lastname" in profile_data:
+        user.lastname = profile_data["lastname"]
+    if "firstname" in profile_data:
+        user.firstname = profile_data["firstname"]
+    if "company_name" in profile_data:
+        user.company_name = profile_data["company_name"]
+    if "time_zone" in profile_data:
+        user.time_zone = profile_data["time_zone"]
+
+    # Step 3: Commit changes to DB
+    db.commit()
+    db.refresh(user)
+
+    # Step 4: Return a success response
+    return {"message": "Profile updated successfully"}
+
+@app.delete("/api/users/profile")
+async def delete_user_profile(
+    current_user: models.User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, str]:
+    """Delete user profile"""
+
+    # Step 1: Retrieve the current user from DB
+    user = db.query(models.User).filter(models.User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Step 2: Delete the user from DB
+    db.delete(user)
+    db.commit()
+    
+    # step t3 fouad go to the hero page 
+    redirect("/hero")
+
+    # Step 3: Return a success response
+    return {"message": "Profile deleted successfully"}
+    
