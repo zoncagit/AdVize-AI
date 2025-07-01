@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta, date
 from pydantic import BaseModel
-
+import httpx
 from app.database import engine, Base, get_db
 from app import models
 from app.cruds import create_ad_account, get_ad_accounts
@@ -1541,25 +1541,12 @@ async def get_campaigns_and_kpis(
         results = []
         for campaign in campaigns:
             campaign_id = campaign["id"]
-            insights_url = f"https://graph.facebook.com/v23.0/{campaign_id}/insights"
-            insights_params = {
-                "fields": "spend,impressions,clicks,ctr,cpc,roas,purchase",
-                "access_token": access_token,
-                "date_preset": "last_7d"
-            }
-            insights_res = await client.get(insights_url, params=insights_params)
-
-            insights_data = (
-                insights_res.json().get("data", [{}])[0]
-                if insights_res.status_code == 200 else {}
-            )
-
+            
             results.append({
                 "id": campaign_id,
                 "name": campaign.get("name"),
                 "status": campaign.get("status"),
                 "objective": campaign.get("objective"),
-                "kpis": insights_data
             })
 
     return results
@@ -1595,6 +1582,26 @@ async def create_campaign(payload: CampaignCreateRequest):
         raise HTTPException(status_code=response.status_code, detail=response.text)
 
     return response.json()
+
+@app.get("/facebook/campaign/{campaign_id}/kpis")
+async def get_campaign_kpis(
+    campaign_id: str,
+    access_token: str = Query(...)
+):
+    url = f"https://graph.facebook.com/v23.0/{campaign_id}/insights"
+    params = {
+        "fields": "spend,impressions,clicks,ctr,cpc,cpp,reach,purchase_roas,cost_per_result",
+        "access_token": access_token,
+        "date_preset": "last_7d"  # or "lifetime" or use time_range for custom
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+
+    return response.json().get("data", [])
 
 @app.put("/api/users/profile")
 async def update_user_profile(
@@ -1632,20 +1639,55 @@ async def delete_user_profile(
     current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ) -> Dict[str, str]:
-    """Delete user profile"""
-
-    # Step 1: Retrieve the current user from DB
-    user = db.query(models.User).filter(models.User.id == current_user.id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # Step 2: Delete the user from DB
-    db.delete(user)
-    db.commit()
+    """
+    Delete user profile and all related data
     
-    # step t3 fouad go to the hero page 
-    redirect("/hero")
+    This will:
+    1. Find all ad accounts owned by the user
+    2. For each ad account, find and delete related campaigns
+    3. Delete the ad accounts
+    4. Finally delete the user
+    """
+    try:
+        # Start a transaction
+        with db.begin_nested():
+            # Step 1: Retrieve the current user from DB with relationships
+            user = db.query(models.User).options(
+                joinedload(models.User.ad_accounts)
+                .joinedload(models.AdAccount.campaigns)
+            ).filter(models.User.id == current_user.id).first()
+            
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
 
-    # Step 3: Return a success response
-    return {"message": "Profile deleted successfully"}
+            # Step 2: Delete all related data
+            for account in user.ad_accounts:
+                # Delete all campaigns for this account
+                for campaign in account.campaigns:
+                    # Delete any related metrics first
+                    db.query(models.CampaignMetric).filter(
+                        models.CampaignMetric.campaign_id == campaign.id
+                    ).delete(synchronize_session=False)
+                    
+                    # Delete the campaign
+                    db.delete(campaign)
+                
+                # Now delete the account
+                db.delete(account)
+            
+            # Step 3: Finally delete the user
+            db.delete(user)
+        
+        # Commit the transaction
+        db.commit()
+        
+        # Return success response
+        return {"message": "Profile and all related data deleted successfully"}
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error deleting user profile: {str(e)}"
+        )
     
