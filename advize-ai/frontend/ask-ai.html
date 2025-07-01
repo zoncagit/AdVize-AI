@@ -40,15 +40,9 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-card-bg border-r border-border-color flex flex-col">
             <!-- Logo -->
-            <div class="p-6 border-b border-border-color">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                    <span class="text-xl font-bold text-white">AdOptimize AI</span>
-                </div>
+            <div class="p-4 ">
+                 <img src="logoadvise.png" alt="logoadvise.png" class="w-40 h-auto ml-3 mt-2" >
+               
             </div>
             
             <!-- Navigation -->
@@ -58,7 +52,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                         </svg>
-                        <span>Overview</span>
+                        <span>Dashboard</span>
                     </a>
                     
                     <a href="optimization.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
@@ -104,15 +98,52 @@
                 <div class="flex items-center space-x-4">
                     <!-- Notifications -->
                     <div class="relative">
-                        <button class="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5-5h5l-5-5H9a7 7 0 000 14h6z"></path>
-                            </svg>
-                        </button>
+
+
+
+                          
+                        <!-- Button (unchanged) -->
+<button id="menuButton" class="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+    <svg width="38px" height="38px" viewBox="-4.8 -4.8 33.60 33.60" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M6.31317 12.463C6.20006 9.29213 8.60976 6.6252 11.701 6.5C14.7923 6.6252 17.202 9.29213 17.0889 12.463C17.0889 13.78 18.4841 15.063 18.525 16.383C18.525 16.4017 18.525 16.4203 18.525 16.439C18.5552 17.2847 17.9124 17.9959 17.0879 18.029H13.9757C13.9786 18.677 13.7404 19.3018 13.3098 19.776C12.8957 20.2372 12.3123 20.4996 11.701 20.4996C11.0897 20.4996 10.5064 20.2372 10.0923 19.776C9.66161 19.3018 9.42346 18.677 9.42635 18.029H6.31317C5.48869 17.9959 4.84583 17.2847 4.87602 16.439C4.87602 16.4203 4.87602 16.4017 4.87602 16.383C4.91795 15.067 6.31317 13.781 6.31317 12.463Z" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M9.42633 17.279C9.01212 17.279 8.67633 17.6148 8.67633 18.029C8.67633 18.4432 9.01212 18.779 9.42633 18.779V17.279ZM13.9757 18.779C14.3899 18.779 14.7257 18.4432 14.7257 18.029C14.7257 17.6148 14.3899 17.279 13.9757 17.279V18.779ZM12.676 5.25C13.0902 5.25 13.426 4.91421 13.426 4.5C13.426 4.08579 13.0902 3.75 12.676 3.75V5.25ZM10.726 3.75C10.3118 3.75 9.97601 4.08579 9.97601 4.5C9.97601 4.91421 10.3118 5.25 10.726 5.25V3.75ZM9.42633 18.779H13.9757V17.279H9.42633V18.779ZM12.676 3.75H10.726V5.25H12.676V3.75Z" fill="#ffffff"></path> </g></svg>
+</button>
+
+<!-- Empty modal popup -->
+<div id="menuDropdown" class="absolute right-4 mt-2 w-56 bg-gray-800 rounded-lg shadow-lg hidden z-50 p-4">
+   <a href="#" class="block px-2 py-2 text-gray-300 hover:bg-white/10 rounded flex items-center space-x-1">
+    <svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+            d="M13 16h-1v-4h-1m1-4h.01M12 19a7 7 0 100-14 7 7 0 000 14z" />
+    </svg>
+    <span class="text-sm">Congrats u have won the hackathon of NIT</span>
+</a>
+</div>
+
+<!-- JavaScript -->
+<script>
+    const menuButton = document.getElementById('menuButton');
+    const menuDropdown = document.getElementById('menuDropdown');
+
+    menuButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent immediate close
+        menuDropdown.classList.toggle('hidden');
+    });
+
+    // Close if clicking outside
+    document.addEventListener('click', (event) => {
+        if (!menuButton.contains(event.target) && !menuDropdown.contains(event.target)) {
+            menuDropdown.classList.add('hidden');
+        }
+    });
+</script>
+
+
+
                         <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                            <span class="text-xs text-white font-bold">3</span>
+                            <span class="text-xs text-white font-bold">1</span>
                         </div>
                     </div>
+            
 
                     <!-- Profile Dropdown -->
                     <div class="relative">
@@ -121,8 +152,8 @@
                                 <span class="text-white text-sm font-medium">JD</span>
                             </div>
                             <div class="text-left">
-                                <div class="text-sm font-medium text-white">John Doe</div>
-                                <div class="text-xs text-gray-400">john@company.com</div>
+                                <div class="text-sm font-medium text-white">Elarouci Abdellah</div>
+                                <div class="text-xs text-gray-400">elarouciabdellah@gmail.com</div>
                             </div>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
