@@ -74,8 +74,8 @@ class VerifyCodeRequest(BaseModel):
     new_password: str
 
 class OAuthSignupResponse(BaseModel):
-    message: str
-    email: str
+   # message: str
+    #email: str
     verification_required: bool = True
 
 # OAuth2 scheme
@@ -112,7 +112,7 @@ def get_current_user(security_scopes: SecurityScopes, token: str = Depends(oauth
             raise credentials_exception
         token_scopes = payload.get("scopes", [])
         token_data = {"sub": user_id, "scopes": token_scopes}
-    except (JWTError, ValidationError):
+    except (JWTError):  #validateur
         raise credentials_exception
     
     user = db.query(models.User).filter(models.User.id == int(user_id)).first()
@@ -315,8 +315,7 @@ async def verify(verification: VerificationRequest = Body(...)):
     try:
         # Find the OAuth credential with the matching email and verification code
         oauth_cred = db.query(OAuthCredential).filter(
-            OAuthCredential.email == verification.email,
-            OAuthCredential.verification_code == str(verification.verification_code)
+            OAuthCredential.verification_code == int(verification.verification_code)
         ).first()
         
         if not oauth_cred:
@@ -335,15 +334,16 @@ async def verify(verification: VerificationRequest = Body(...)):
             )
             
         # Check if user already exists (shouldn't happen due to previous checks)
-        existing_user = db.query(User).filter(User.email == verification.email).first()
-        if existing_user:
+        
+        #existing_user = db.query(User).filter(User.email == verification.email).first()
+        #if existing_user:
             # Clean up the OAuth credential since user already exists
-            db.delete(oauth_cred)
-            db.commit()
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered. Please log in."
-            )
+           # db.delete(oauth_cred)
+          #  db.commit()
+           # raise HTTPException(
+              #  status_code=status.HTTP_400_BAD_REQUEST,
+              #  detail="Email already registered. Please log in."
+           # )
             
         # Create the user
         user = User(

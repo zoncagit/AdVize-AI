@@ -60,12 +60,12 @@ def create_oauth_credential(
 
 def verify_oauth_credential(
     db: Session,
-    email: str,
+    #email: str,
     verification_code: str
 ):
     return db.query(models.OAuthCredential).filter(
         and_(
-            models.OAuthCredential.email == email,
+            #models.OAuthCredential.email == email,
             models.OAuthCredential.verification_code == verification_code,
             models.OAuthCredential.code_expires_at > datetime.utcnow(),
             models.OAuthCredential.is_verified == False

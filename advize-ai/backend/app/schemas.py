@@ -56,9 +56,9 @@ class OAuthCredentialCreate(OAuthCredentialBase):
     pass
 
 class OAuthCredentialVerify(BaseModel):
-    email: EmailStr
-    verification_code: str
-    password: str
+  
+    verification_code: int
+   
 
 class OAuthCredentialRead(OAuthCredentialBase):
     user_id: Optional[int]
