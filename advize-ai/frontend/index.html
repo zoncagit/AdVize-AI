@@ -1,0 +1,1409 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdVise AI - AI-Powered Ad Optimization Platform</title>
+    <meta name="description" content="Maximize your ROAS with advanced AI-powered ad optimization across Meta, TikTok, Snapchat, and Google Ads.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dashboard-bg': 'hsl(220 27% 8%)',
+                        'card-bg': 'hsl(220 23% 12%)',
+                        'border-color': 'hsl(220 18% 18%)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: hsl(220 27% 8%);
+        }
+        .gradient-primary {
+            background: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(189 94% 43%) 100%);
+        }
+        .gradient-success {
+            background: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(158 64% 52%) 100%);
+        }
+        .metric-card {
+            background: hsl(220 23% 12%);
+            border: 1px solid hsl(220 18% 18%);
+        }
+        .feature-card {
+            background: rgba(220, 223, 230, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(220, 223, 230, 0.1);
+        }
+        .feature-card:hover {
+            background: rgba(220, 223, 230, 0.08);
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="border-b border-opacity-20 backdrop-blur-md bg-opacity-5" style="border-color: hsl(220 18% 18%);">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                   <!-- <img -->
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-1">
+                    <button id="nav-overview" class="nav-btn active px-4 py-2 rounded text-white hover:bg-white hover:bg-opacity-10 transition-colors">
+                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                        </svg>
+                        dashboard
+                    </button>
+                    <button id="nav-dashboard" class="nav-btn px-4 py-2 rounded text-white hover:bg-white hover:bg-opacity-10 transition-colors">
+                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                        </svg>
+                        Features
+                    </button>
+                    <button onclick="scrollToPricing()" id="nav-pricing" class="nav-btn px-4 py-2 rounded text-white hover:bg-white hover:bg-opacity-10 transition-colors">
+                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        Pricing
+                    </button>
+                    <button class="px-4 py-2 rounded text-white hover:bg-white hover:bg-opacity-10 transition-colors">
+                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Settings
+                    </button>
+                </div>
+                
+                <button id="nav-signup" class="gradient-primary text-white font-semibold px-6 py-2 rounded hover:opacity-90 transition-opacity">
+                    Get Started
+                </button>
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero-section" class="view-section text-center py-16">
+        <div class="max-w-4xl mx-auto space-y-8 px-4">
+            <div class="space-y-4">
+                <h1 class="text-5xl md:text-7xl font-bold text-white leading-tight">
+                    AI-Powered
+                    <span class="block bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                        Ad Optimization
+                    </span>
+                </h1>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                    Maximize your ROAS with advanced machine learning algorithms that analyze, 
+                    optimize, and scale your campaigns across all platforms automatically.
+                </p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button id="hero-get-started" class="gradient-primary text-lg text-white font-semibold px-8 py-2 hover:opacity-90 transition-opacity rounded-lg flex items-center justify-center">
+                    <span>Start now</span>
+    <svg class="w-5 h-5 ml-2 flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <g transform="matrix(.909448 0 0 .909448 -259.0175 -817.2446)">
+            <path d="m308 911.67377a1.0001 1.0001 0 0 0 -.5625-.71875l-6-3a1.0001 1.0001 0 0 0 -1.375.59375l-.625 1.8125h-10.4375a1.0001 1.0001 0 0 0 -1 1v1a1.0001 1.0001 0 0 0 1 1h10.4375l.625 1.8125a1.0001 1.0001 0 0 0 1.375.59375l6-3a1.0001 1.0001 0 0 0 .5625-1 1.0001 1.0001 0 0 0 0-.0937z"></path>
+            <path d="m307 911.86127-6-3-.84375 2.5h-11.15625v1h11.15625l.84375 2.5z" fill="#ffffff"></path>
+        </g>
+    </svg>
+                </button>
+                <button class="bg-gradient-to-r from-[#0a0f2c] to-black text-lg text-white font-semibold px-6 py-2 hover:opacity-90 transition-opacity rounded-lg flex items-center justify-center
+">
+                   <span>Watch Demo</span>
+                    <svg class="w-5 h-5 ml-2 flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 5v14l11-7z"></path>
+    </svg>
+                
+                </button>
+            </div>
+            
+            <div class="text-sm text-gray-400">14-day free trial • No credit card required • Cancel anytime</div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="py-20 px-8">
+            <div class="text-center mb-20 mt-10">
+                <h2 class="text-4xl font-bold text-white mb-9">How It Works</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto mt-12">Get started in minutes and see results immediately with </p>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto"> our AI-powered optimization platform.</p>
+            </div>
+            
+             <div id="das" class="space-y-8 px-14">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-white">Campaign Dashboard</h1>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="metric-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                        </div>
+                        <div class="flex items-center text-green-400 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            +15.2%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white mb-1">$12,450</div>
+                        <div class="text-gray-400 text-sm">Ad Spend</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-green-500 bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                        <div class="flex items-center text-green-400 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            +28.1%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white mb-1">4.2x</div>
+                        <div class="text-gray-400 text-sm">ROAS</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                            </svg>
+                        </div>
+                        <div class="flex items-center text-green-400 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            +12.5%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white mb-1">2.8%</div>
+                        <div class="text-gray-400 text-sm">CTR</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-orange-500 bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex items-center text-red-400 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                            </svg>
+                            -18.3%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white mb-1">$0.42</div>
+                        <div class="text-gray-400 text-sm">CPC</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="metric-card rounded-xl p-6">
+                <button class="w-full gradient-primary text-white font-semibold py-4 text-lg hover:opacity-90 transition-opacity rounded-lg">
+                    Run Optimization Audit
+                </button>
+            </div>
+        </div>
+
+
+        <!-- Features Section -->
+        <div class="py-12 px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">Everything you need to optimize your ads</h2>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">Powerful features designed to maximize your advertising performance and ROI</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <div class="feature-card group cursor-pointer rounded-2xl
+                 p-8 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 ">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Real-time Data Sync</h3>
+                            <p class="text-gray-300 leading-relaxed">Instant synchronization with all your ad platforms for up-to-the-minute insights and performance tracking.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card group cursor-pointer rounded-2xl p-8 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            
+
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+<svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" stroke-width="0">
+
+<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+
+<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+
+<g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M12.5 6.00004C12.5 5.31322 12.2163 4.67366 11.7431 4.25578C11.2602 3.82926 10.5847 3.64296 9.87881 3.88387C9.12643 4.14065 8.27977 4.57906 7.61885 5.33233C7.12428 5.89599 6.74984 6.61798 6.58793 7.53045C5.74098 7.65664 5.00843 8.16524 4.47868 8.87157C3.86487 9.68999 3.5 10.7977 3.5 12C3.5 13.2023 3.86487 14.31 4.47868 15.1284C4.99276 15.8139 5.69782 16.3131 6.51308 16.4574C6.50452 16.494 6.5 16.5322 6.5 16.5715C6.5 17.7099 6.9821 18.5424 7.66175 19.1267C8.32466 19.6965 9.1633 20.0221 9.89841 20.212C11.366 20.5912 12.5 19.3418 12.5 18V6.00004ZM7.48691 16.4573C7.49547 16.494 7.5 16.5322 7.5 16.5715C7.5 17.3882 7.83089 17.9534 8.31361 18.3683C8.81308 18.7977 9.48618 19.0727 10.1486 19.2438C10.8199 19.4173 11.5 18.8674 11.5 18V6.00004C11.5 5.58229 11.3265 5.22198 11.0812 5.00533C10.8456 4.79731 10.5413 4.71442 10.2018 4.83027C9.55295 5.05172 8.87946 5.41182 8.37053 5.99186C7.87016 6.56214 7.5 7.37709 7.5 8.57147C7.5 8.84761 7.27614 9.07147 7 9.07147C6.72388 9.07147 6.50003 8.84764 6.5 8.57152C6.04804 8.70228 5.62513 9.00964 5.27868 9.47157C4.80671 10.1009 4.5 10.9932 4.5 12C4.5 13.0068 4.80671 13.8991 5.27868 14.5284C5.75054 15.1576 6.36424 15.5 7 15.5C7.59053 15.5 8.15996 15.2055 8.61676 14.6603C8.79412 14.4487 9.10948 14.4209 9.32114 14.5982C9.53279 14.7756 9.5606 15.091 9.38324 15.3026C8.88463 15.8976 8.23125 16.3255 7.48691 16.4573Z" fill="#ffffff"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M16.55 11.5H14.5C14.2239 11.5 14 11.7239 14 12C14 12.2761 14.2239 12.5 14.5 12.5H16.55C16.7816 13.6411 17.7905 14.5 19 14.5C20.3807 14.5 21.5 13.3807 21.5 12C21.5 10.6193 20.3807 9.5 19 9.5C17.7905 9.5 16.7816 10.3589 16.55 11.5ZM17.5 11.9963C17.502 11.1695 18.1728 10.5 19 10.5C19.8284 10.5 20.5 11.1716 20.5 12C20.5 12.8284 19.8284 13.5 19 13.5C18.1728 13.5 17.502 12.8305 17.5 12.0037L17.5 12L17.5 11.9963Z" fill="#ffffff"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M17.3385 16.132C17.7802 15.7388 18.3622 15.5 19 15.5C20.3807 15.5 21.5 16.6193 21.5 18C21.5 19.3807 20.3807 20.5 19 20.5C17.6193 20.5 16.5 19.3807 16.5 18C16.5 17.6162 16.5865 17.2527 16.741 16.9277C16.7227 16.9166 16.7049 16.9042 16.6877 16.8904L14.1877 14.8904C13.972 14.7179 13.9371 14.4033 14.1096 14.1877C14.2821 13.972 14.5967 13.9371 14.8124 14.1096L17.3124 16.1096C17.3214 16.1168 17.3301 16.1243 17.3385 16.132ZM19 16.5C18.1716 16.5 17.5 17.1716 17.5 18C17.5 18.8284 18.1716 19.5 19 19.5C19.8284 19.5 20.5 18.8284 20.5 18C20.5 17.1716 19.8284 16.5 19 16.5Z" fill="#ffffff"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M19 3.5C17.6193 3.5 16.5 4.61929 16.5 6C16.5 6.38376 16.5865 6.74733 16.741 7.07228C16.7227 7.08341 16.7049 7.09584 16.6877 7.10958L14.1877 9.10958C13.972 9.28209 13.9371 9.59674 14.1096 9.81237C14.2821 10.028 14.5967 10.063 14.8124 9.89045L17.3124 7.89045C17.3214 7.88323 17.3301 7.87575 17.3385 7.86804C17.7802 8.26116 18.3622 8.5 19 8.5C20.3807 8.5 21.5 7.38071 21.5 6C21.5 4.61929 20.3807 3.5 19 3.5ZM17.5 6C17.5 5.17157 18.1716 4.5 19 4.5C19.8284 4.5 20.5 5.17157 20.5 6C20.5 6.82843 19.8284 7.5 19 7.5C18.1716 7.5 17.5 6.82843 17.5 6Z" fill="#ffffff"></path> </g>
+
+</svg>
+ 
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">AI Optimization Engine</h3>
+                            <p class="text-gray-300 leading-relaxed">Advanced machine learning algorithms analyze your campaigns and provide smart recommendations to maximize ROAS.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card group cursor-pointer rounded-2xl p-8 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Advanced Analytics</h3>
+                            <p class="text-gray-300 leading-relaxed">Deep insights into campaign performance with predictive analytics and actionable recommendations.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card group cursor-pointer rounded-2xl p-8 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-yellow-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">AI Marketing Assistant</h3>
+                            <p class="text-gray-300 leading-relaxed">Chat with our AI to get expert answers about your campaigns, optimization strategies, and market insights.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card group cursor-pointer rounded-2xl p-8 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Multi-Platform Integration</h3>
+                            <p class="text-gray-300 leading-relaxed">Seamlessly manage Meta, TikTok, Snapchat, and Google Ads campaigns from one unified dashboard.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card group cursor-pointer rounded-2xl p-8 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Automated Reporting</h3>
+                            <p class="text-gray-300 leading-relaxed">Generate and schedule beautiful, branded reports with key metrics and insights for stakeholders.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <div class="view-section container mx-auto px-4 py-20 hidden">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">
+                    Simple, Transparent <span class="text-blue-400">Pricing</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+                    Choose the perfect plan for your business. Start free and upgrade as you grow.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <div class="metric-card rounded-xl p-8 relative">
+                    <div class="space-y-6">
+                        <div class="text-center">
+                            <h3 class="text-2xl font-bold text-white mb-2">Free</h3>
+                            <div class="flex items-baseline justify-center">
+                                <span class="text-4xl font-bold text-white">$0</span>
+                                <span class="text-gray-400 ml-1">/forever</span>
+                            </div>
+                            <p class="text-gray-400 mt-2">Perfect for getting started</p>
+                        </div>
+                        
+                        <ul class="space-y-3">
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Connect 1 ad account
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Basic optimization insights
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                7-day data history
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Email support
+                            </li>
+                        </ul>
+                        
+                        <button class="w-full py-3 font-semibold bg-white bg-opacity-5 border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors">
+                            Start Free
+                        </button>
+                    </div>
+                </div>
+    
+                <div class="metric-card rounded-xl p-8 relative ring-2 ring-blue-500">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <div class="gradient-primary px-4 py-2 rounded-full text-white text-sm font-semibold">
+                            Most Popular
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="text-center">
+                            <h3 class="text-2xl font-bold text-white mb-2">Pro</h3>
+                            <div class="flex items-baseline justify-center">
+                                <span class="text-4xl font-bold text-white">$49</span>
+                                <span class="text-gray-400 ml-1">/per month</span>
+                            </div>
+                            <p class="text-gray-400 mt-2">For growing businesses</p>
+                        </div>
+                        
+                        <ul class="space-y-3">
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Connect 5 ad accounts
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Advanced AI optimization
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                90-day data history
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Ask AI feature
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Priority support
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Custom reports
+                            </li>
+                        </ul>
+                        
+                        <button class="w-full py-3 font-semibold gradient-primary text-white hover:opacity-90 rounded-lg transition-opacity">
+                            Start Free Trial
+                        </button>
+                    </div>
+                </div>
+    
+                <div class="metric-card rounded-xl p-8 relative">
+                    <div class="space-y-6">
+                        <div class="text-center">
+                            <h3 class="text-2xl font-bold text-white mb-2">Business</h3>
+                            <div class="flex items-baseline justify-center">
+                                <span class="text-4xl font-bold text-white">$149</span>
+                                <span class="text-gray-400 ml-1">/per month</span>
+                            </div>
+                            <p class="text-gray-400 mt-2">For agencies and enterprises</p>
+                        </div>
+                        
+                        <ul class="space-y-3">
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Unlimited ad accounts
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                White-label reports
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                1-year data history
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                API access
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Dedicated account manager
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Custom integrations
+                            </li>
+                        </ul>
+                        
+                        <button class="w-full py-3 font-semibold bg-white bg-opacity-5 border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors">
+                            Contact Sales
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12 text-gray-400">
+                <p>All plans include 14-day free trial • No credit card required • Cancel anytime</p>
+            </div>
+        </div>
+      </div> 
+
+    <div id="pricing-section" class="view-section container mx-auto px-4 py-20 hidden">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-white mb-4">
+                Simple, Transparent <span class="text-blue-400">Pricing</span>
+            </h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+                Choose the perfect plan for your business. Start free and upgrade as you grow.
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div class="metric-card rounded-xl p-8 relative">
+                <div class="space-y-6">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-white mb-2">Free</h3>
+                        <div class="flex items-baseline justify-center">
+                            <span class="text-4xl font-bold text-white">$0</span>
+                            <span class="text-gray-400 ml-1">/forever</span>
+                        </div>
+                        <p class="text-gray-400 mt-2">Perfect for getting started</p>
+                    </div>
+                    
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Connect 1 ad account
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Basic optimization insights
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            7-day data history
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Email support
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full py-3 font-semibold bg-white bg-opacity-5 border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors">
+                        Start Free
+                    </button>
+                </div>
+            </div>
+            <div class="metric-card rounded-xl p-8 relative ring-2 ring-blue-500">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div class="gradient-primary px-4 py-2 rounded-full text-white text-sm font-semibold">
+                        Most Popular
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-white mb-2">Pro</h3>
+                        <div class="flex items-baseline justify-center">
+                            <span class="text-4xl font-bold text-white">$49</span>
+                            <span class="text-gray-400 ml-1">/per month</span>
+                        </div>
+                        <p class="text-gray-400 mt-2">For growing businesses</p>
+                    </div>
+                    
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Connect 5 ad accounts
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Advanced AI optimization
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            90-day data history
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Ask AI feature
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Priority support
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Custom reports
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full py-3 font-semibold gradient-primary text-white hover:opacity-90 rounded-lg transition-opacity">
+                        Start Free Trial
+                    </button>
+                </div>
+            </div>
+            <div class="metric-card rounded-xl p-8 relative">
+                <div class="space-y-6">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-white mb-2">Business</h3>
+                        <div class="flex items-baseline justify-center">
+                            <span class="text-4xl font-bold text-white">$149</span>
+                            <span class="text-gray-400 ml-1">/per month</span>
+                        </div>
+                        <p class="text-gray-400 mt-2">For agencies and enterprises</p>
+                    </div>
+                    
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Unlimited ad accounts
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            White-label reports
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            1-year data history
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            API access
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Dedicated account manager
+                        </li>
+                        <li class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Custom integrations
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full py-3 font-semibold bg-white bg-opacity-5 border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-12 text-gray-400">
+            <p>All plans include 14-day free trial • No credit card required • Cancel anytime</p>
+        </div>
+    </div>        
+
+    </section>
+    <!-- Dashboard Section -->
+    <section id="dashboard-section" class="view-section hidden container mx-auto px-4 py-20">
+        <div class="space-y-8">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-white">Campaign Dashboard</h1>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="metric-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                        </div>
+                        <div class="flex items-center text-green-400 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            +15.2%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white mb-1">$12,450</div>
+                        <div class="text-gray-400 text-sm">Ad Spend</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-green-500 bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                        <div class="flex items-center text-green-400 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            +28.1%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white mb-1">4.2x</div>
+                        <div class="text-gray-400 text-sm">ROAS</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                            </svg>
+                        </div>
+                        <div class="flex items-center text-green-400 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            +12.5%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white mb-1">2.8%</div>
+                        <div class="text-gray-400 text-sm">CTR</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-orange-500 bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex items-center text-red-400 text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                            </svg>
+                            -18.3%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white mb-1">$0.42</div>
+                        <div class="text-gray-400 text-sm">CPC</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="metric-card rounded-xl p-6">
+                <button class="w-full gradient-primary text-white font-semibold py-4 text-lg hover:opacity-90 transition-opacity rounded-lg">
+                    Run Optimization Audit
+                </button>
+            </div>
+        </div>
+        
+    
+
+            <!-- Pricing Section -->
+            <section id="pricing-section1" class="view-section  container mx-auto px-4 py-20">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-white mb-4">
+                        Simple, Transparent <span class="text-blue-400">Pricing</span>
+                    </h2>
+                    <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+                        Choose the perfect plan for your business. Start free and upgrade as you grow.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    <div class="metric-card rounded-xl p-8 relative">
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold text-white mb-2">Free</h3>
+                                <div class="flex items-baseline justify-center">
+                                    <span class="text-4xl font-bold text-white">$0</span>
+                                    <span class="text-gray-400 ml-1">/forever</span>
+                                </div>
+                                <p class="text-gray-400 mt-2">Perfect for getting started</p>
+                            </div>
+                            
+                            <ul class="space-y-3">
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Connect 1 ad account
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Basic optimization insights
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    7-day data history
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Email support
+                                </li>
+                            </ul>
+                            
+                            <button class="w-full py-3 font-semibold bg-white bg-opacity-5 border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors">
+                                Start Free
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="metric-card rounded-xl p-8 relative ring-2 ring-blue-500">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                            <div class="gradient-primary px-4 py-2 rounded-full text-white text-sm font-semibold">
+                                Most Popular
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold text-white mb-2">Pro</h3>
+                                <div class="flex items-baseline justify-center">
+                                    <span class="text-4xl font-bold text-white">$49</span>
+                                    <span class="text-gray-400 ml-1">/per month</span>
+                                </div>
+                                <p class="text-gray-400 mt-2">For growing businesses</p>
+                            </div>
+                            
+                            <ul class="space-y-3">
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Connect 5 ad accounts
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Advanced AI optimization
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    90-day data history
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Ask AI feature
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Priority support
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Custom reports
+                                </li>
+                            </ul>
+                            
+                            <button class="w-full py-3 font-semibold gradient-primary text-white hover:opacity-90 rounded-lg transition-opacity">
+                                Start Free Trial
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="metric-card rounded-xl p-8 relative">
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold text-white mb-2">Business</h3>
+                                <div class="flex items-baseline justify-center">
+                                    <span class="text-4xl font-bold text-white">$149</span>
+                                    <span class="text-gray-400 ml-1">/per month</span>
+                                </div>
+                                <p class="text-gray-400 mt-2">For agencies and enterprises</p>
+                            </div>
+                            
+                            <ul class="space-y-3">
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Unlimited ad accounts
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    White-label reports
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    1-year data history
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    API access
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Dedicated account manager
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Custom integrations
+                                </li>
+                            </ul>
+                            
+                            <button class="w-full py-3 font-semibold bg-white bg-opacity-5 border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors">
+                                Contact Sales
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-12 text-gray-400">
+                    <p>All plans include 14-day free trial • No credit card required • Cancel anytime</p>
+                </div>
+            </section>
+
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing-section2" class="py-16 px-4 bg-gradient-to-b from-gray-900 to-gray-900">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">Choose the plan that fits your business needs</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Basic Plan -->
+                <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-blue-500 transition-colors">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-2">Starter</h3>
+                            <p class="text-gray-400">Perfect for small businesses getting started</p>
+                        </div>
+                        <div class="text-5xl font-bold text-white">$99<span class="text-lg text-gray-400">/month</span></div>
+                        <ul class="space-y-3">
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Up to 3 Ad Accounts
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Daily Optimization
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Email Support
+                            </li>
+                        </ul>
+                        <button class="w-full mt-6 py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors">
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="relative bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-8 transform scale-105 z-10">
+                    <div class="absolute top-0 right-0 bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">MOST POPULAR</div>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-2">Professional</h3>
+                            <p class="text-blue-100">For growing businesses with multiple campaigns</p>
+                        </div>
+                        <div class="text-5xl font-bold text-white">$299<span class="text-lg text-blue-200">/month</span></div>
+                        <ul class="space-y-3">
+                            <li class="flex items-center text-blue-100">
+                                <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Up to 10 Ad Accounts
+                            </li>
+                            <li class="flex items-center text-blue-100">
+                                <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Real-time Optimization
+                            </li>
+                            <li class="flex items-center text-blue-100">
+                                <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Priority Support
+                            </li>
+                            <li class="flex items-center text-blue-100">
+                                <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Advanced Analytics
+                            </li>
+                        </ul>
+                        <button class="w-full mt-6 py-3 px-6 bg-white hover:bg-gray-100 text-blue-600 font-medium rounded-lg transition-colors">
+                            Start Free Trial
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-blue-500 transition-colors">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-2">Enterprise</h3>
+                            <p class="text-gray-400">For large businesses with custom needs</p>
+                        </div>
+                        <div class="text-5xl font-bold text-white">Custom</div>
+                        <ul class="space-y-3">
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Unlimited Ad Accounts
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Real-time Optimization
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                24/7 Dedicated Support
+                            </li>
+                            <li class="flex items-center text-gray-300">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Custom Integrations
+                            </li>
+                        </ul>
+                        <button class="w-full mt-6 py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors">
+                            Contact Sales
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 text-center text-gray-400 text-sm">
+                <p>Need something different? <a href="#" class="text-blue-400 hover:text-blue-300">Contact our sales team</a> for custom solutions.</p>
+                <p class="mt-2">All plans come with a 14-day free trial. No credit card required.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Sign Up Section -->
+    <section id="signup-section" class="view-section hidden container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <div class="metric-card rounded-xl p-8 ">
+                <div class="space-y-7">
+                    <div class="text-center space-y-2">
+                        <h2 class="text-3xl font-bold text-white">Get Started</h2>
+                        <p class="text-gray-400">Create your account and start optimizing</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                            <div>
+                                <label for="firstName" class="text-white mb-2 block">First Name</label>
+                                <input id="firstName" name="first_name" type="text" placeholder="First name" class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none" required>
+                            </div>
+                            <div>
+                                <label for="lastName" class="text-white mb-2 block">Last Name</label>
+                                <input id="lastName" name="last_name" type="text" placeholder="Last name" class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none" required>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="text-white mb-2 block">Email</label>
+                            <input id="email" type="email" placeholder="Enter your email" class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="text-white mb-2 block">Password</label>
+                            <input id="password" type="password" placeholder="Create a password" class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none">
+                        </div>
+                        
+                        <div>
+                            <label for="confirmPassword" class="text-white mb-2 block">Confirm Password</label>
+                            <input id="confirmPassword" type="password" placeholder="Confirm your password" class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-600">
+                      Do you have an account?
+                      <button id="nav-login" class="text-blue-600 hover:underline ml-1">
+                       Log in
+                      </button>
+                    </p>
+                    
+                    <button type="button" onclick="window.location.href='dashboard.html'" class="mb-8 translate-y-4 w-full gradient-primary text-white font-semibold py-2 text-lg hover:opacity-90 transition-opacity rounded-lg">
+                        signup
+                    </button>
+        
+                    <button id="back-to-home" class="w-full border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-10 py-3 rounded-lg transition-colors">
+                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!--login <section></section>--->
+    <section id="login-section" class="view-section hidden container mx-auto px-4">
+        <div class="max-w-md mx-auto">
+            <div class=" metric-card rounded-xl p-8 mt-20">
+                <div class="space-y-5
+                ">
+                    <div class="text-center space-y-2">
+                        <h2 class="text-3xl font-bold text-white">Get Started</h2>
+                        <p class="text-gray-400">Create your account and start optimizing</p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div></div>
+                        <form id="login-form">
+                            <label  for="email" class="text-white mb-2 block">Email</label>
+                            <input id="email" type="email" placeholder="Enter your email" class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="text-white mb-2 block">Password</label>
+                            <input id="password" type="password" placeholder="Create a password" class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none">
+         
+                        </div> 
+                        
+                            
+                               <button id="nav-resetpassword" class="text-blue-600 hover:underline ml-60   px-3">
+                                forget password?
+                               </button>
+                        </form>      
+                            
+                        
+                        <p class="text-sm text-gray-600">
+                             Do you want to sign in ?
+                               <button id="nav-Signup" class="text-blue-600 hover:underline ml-1">
+                                sign in 
+                               </button>
+                        </p>
+                        <button type="button" onclick="window.location.href='dashboard.html'" class="mb-8 translate-y-4 w-full gradient-primary text-white font-semibold py-2 text-lg hover:opacity-90 transition-opacity rounded-lg">
+
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            log in 
+                        </button>
+                     
+                        <button id="back-to-home-login" class="w-full border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-10 py-3 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            Back to Home
+                        </button>
+                       
+                    </div>  
+                </div>
+            </div>
+        </div>                 
+    </section>
+
+
+    <section id="resetpassword-section" class="view-section hidden container mx-auto px-4 py-8">
+
+        <div  class="max-w-md mx-auto">
+            <div class=" metric-card rounded-xl p-8 mt-20">
+                <div class="space-y-2">
+                    <div class="text-center space-y-2">
+                        <h2 class="text-3xl font-bold text-white">Get Started</h2>
+                        <p class="text-gray-400">Create your account and start optimizing</p>
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <div></div>
+                            <label for="email" class="text-white mb-2 block">Email</label>
+                            <input id="email" type="email" placeholder="Enter your email" class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none">
+                        </div>
+                    </div>
+
+                        <button id="nav-verefication" class="w-full-blue-600 border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-8 py-3  px-3 mt-4 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 mr-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            send the code 
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id ="verification-section" class="view-section hidden container mx-auto px-4 py-8">
+        <div  class="max-w-md mx-auto">
+            <div class=" metric-card rounded-xl p-8 mt-20">
+                <div class="space-y-2">
+                    <div class="text-center space-y-2">
+                        <h2 class="text-3xl font-bold text-white">Get Started</h2>
+                        <p class="text-gray-400">Create your account and start optimizing</p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div></div>
+                            <label for=" code " class="text-white mb-2 block">the code </label>
+                            <input id="the code" type="the code " placeholder="Enter the code " class="w-full p-3 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-20 text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none">
+                        </div>
+                        <button id="nav-verefication" class="w-full-blue-600 border border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-8 py-3  px-6 ml-2 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 mr-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+        // Navigation functionality
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const sections = document.querySelectorAll('.view-section');
+        const signupButton = document.getElementById('nav-signup');
+        const heroGetStarted = document.getElementById('hero-get-started');
+        const loginButton  = document.getElementById('nav-login');
+        const backToHome = document.getElementById('back-to-home');
+        const backToHomee = document.getElementById('back-to-home-login');
+        const signupButtonn = document.getElementById('nav-Signup');
+        const resetPasswordButton = document.getElementById('nav-resetpassword');
+        const codeButton = document.getElementById('nav-verefication');
+        const loginSuccess = document.getElementById('login-success');
+
+        
+
+        function showSection(sectionId) {
+            sections.forEach(section => section.classList.add('hidden'));
+            document.getElementById(sectionId + '-section').classList.remove('hidden');
+            
+            navButtons.forEach(btn => btn.classList.remove('active', 'gradient-primary'));
+            navButtons.forEach(btn => btn.classList.add('hover:bg-white', 'hover:bg-opacity-10'));
+            
+            const activeBtn = document.getElementById('nav-' + sectionId);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'gradient-primary');
+                activeBtn.classList.remove('hover:bg-white', 'hover:bg-opacity-10');
+            }
+        }
+
+        
+
+
+       
+
+        // Navigation event listeners
+        document.getElementById('nav-overview').addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('hero');
+            scrollToSection('hero');
+        });
+          
+       
+     
+        document.getElementById('nav-dashboard').addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('dashboard');
+            scrollToSection('dashboard');
+        });
+
+        document.getElementById('nav-pricing').addEventListener('click', (e) => {
+           e.preventDefault();
+           scrollToPricing();
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                if (targetId) {
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+        
+        signupButton.addEventListener('click', () => showSection('signup'));
+        heroGetStarted.addEventListener('click', () => showSection('signup'));
+        loginButton.addEventListener('click', () => showSection('login'));
+        backToHome.addEventListener('click', () => showSection('hero'));
+        backToHomee.addEventListener('click', () => showSection('hero'));
+        signupButtonn.addEventListener('click', () => showSection('signup'));
+        resetPasswordButton.addEventListener('click', () => showSection('resetpassword'));
+        codeButton.addEventListener('click', () => showSection('verification'));
+        loginSuccess.addEventListener('click', () => showSection('login-success'));
+
+        // Initialize with hero section
+        showSection('hero');
+        
+        // Add smooth scroll to hero section when Get Started button is clicked
+        document.getElementById('nav-signup').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('hero');
+            document.getElementById('hero-section').scrollIntoView({ behavior: 'smooth' });
+        });
+        document.getElementById('nav-pricing').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('hero');
+            document.getElementById('pricing-section2').scrollIntoView({ behavior: 'smooth' });
+        });
+        document.getElementById('nav-dashboard').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('hero');
+            document.getElementById('das').scrollIntoView({ behavior: 'smooth' });
+        });
+        // Function to scroll to pricing section
+        function scrollToPricing() {
+            showSection('pricing-section1');
+            const pricingSection = document.getElementById('pricing-section2');
+            if (pricingSection) {
+                pricingSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+         
+    </script>
+</body>
+</html>

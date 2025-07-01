@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdOptimize AI - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dashboard-bg': 'hsl(220 27% 8%)',
+                        'card-bg': 'hsl(220 23% 12%)',
+                        'border-color': 'hsl(220 18% 18%)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-primary {
+            background: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(189 94% 43%) 100%);
+        }
+        .metric-card {
+            background: hsl(220 23% 12%);
+            border: 1px solid hsl(220 18% 18%);
+            backdrop-filter: blur(12px);
+        }
+        .sidebar-active {
+            background: rgba(59, 130, 246, 0.1);
+            border-right: 2px solid rgb(59, 130, 246);
+            color: rgb(96, 165, 250);
+        }
+    </style>
+</head>
+<body class="bg-dashboard-bg text-white min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-card-bg border-r border-border-color flex flex-col">
+            <!-- Logo -->
+            <div class="p-4 ">
+                <img src="logoadvise.png" alt="logoadvise.png" class="w-40 h-auto ml-3 mt-2" >
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 p-4">
+                <div class="space-y-2">
+                    <a href="dashboard.html" class="sidebar-active flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    <a href="optimization.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span>Optimization</span>
+                    </a>
+                    
+                    <a href="ask-ai.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        <span>Ask AI</span>
+                    </a>
+                    
+                    <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Navigation -->
+            <header class="h-16 bg-card-bg border-b border-border-color px-6 flex items-center justify-between">
+                <!-- Search -->
+                <div class="flex-1 max-w-md">
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" placeholder="Search campaigns, audiences, keywords..." class="pl-10 pr-4 py-2 w-full bg-white/5 border border-border-color rounded-lg text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Right side -->
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
+                    <div class="relative">
+                         <!-- Button (unchanged) -->
+<button id="menuButton" class="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+   <svg width="38px" height="38px" viewBox="-4.8 -4.8 33.60 33.60" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M6.31317 12.463C6.20006 9.29213 8.60976 6.6252 11.701 6.5C14.7923 6.6252 17.202 9.29213 17.0889 12.463C17.0889 13.78 18.4841 15.063 18.525 16.383C18.525 16.4017 18.525 16.4203 18.525 16.439C18.5552 17.2847 17.9124 17.9959 17.0879 18.029H13.9757C13.9786 18.677 13.7404 19.3018 13.3098 19.776C12.8957 20.2372 12.3123 20.4996 11.701 20.4996C11.0897 20.4996 10.5064 20.2372 10.0923 19.776C9.66161 19.3018 9.42346 18.677 9.42635 18.029H6.31317C5.48869 17.9959 4.84583 17.2847 4.87602 16.439C4.87602 16.4203 4.87602 16.4017 4.87602 16.383C4.91795 15.067 6.31317 13.781 6.31317 12.463Z" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M9.42633 17.279C9.01212 17.279 8.67633 17.6148 8.67633 18.029C8.67633 18.4432 9.01212 18.779 9.42633 18.779V17.279ZM13.9757 18.779C14.3899 18.779 14.7257 18.4432 14.7257 18.029C14.7257 17.6148 14.3899 17.279 13.9757 17.279V18.779ZM12.676 5.25C13.0902 5.25 13.426 4.91421 13.426 4.5C13.426 4.08579 13.0902 3.75 12.676 3.75V5.25ZM10.726 3.75C10.3118 3.75 9.97601 4.08579 9.97601 4.5C9.97601 4.91421 10.3118 5.25 10.726 5.25V3.75ZM9.42633 18.779H13.9757V17.279H9.42633V18.779ZM12.676 3.75H10.726V5.25H12.676V3.75Z" fill="#ffffff"></path> </g></svg>
+</button>
+
+<!-- Empty modal popup -->
+<div id="menuDropdown" class="absolute right-4 mt-2 w-56 bg-gray-800 rounded-lg shadow-lg hidden z-50 p-4">
+   <a href="#" class="block px-2 py-2 text-gray-300 hover:bg-white/10 rounded flex items-center space-x-1">
+    <svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+            d="M13 16h-1v-4h-1m1-4h.01M12 19a7 7 0 100-14 7 7 0 000 14z" />
+    </svg>
+    <span class="text-sm">Congrats u have won the hackathon of NIT</span>
+</a>
+</div>
+
+<!-- JavaScript -->
+<script>
+    const menuButton = document.getElementById('menuButton');
+    const menuDropdown = document.getElementById('menuDropdown');
+
+    menuButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent immediate close
+        menuDropdown.classList.toggle('hidden');
+    });
+
+    // Close if clicking outside
+    document.addEventListener('click', (event) => {
+        if (!menuButton.contains(event.target) && !menuDropdown.contains(event.target)) {
+            menuDropdown.classList.add('hidden');
+        }
+    });
+</script>
+                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                            <span class="text-xs text-white font-bold">1</span>
+                        </div>
+                    </div>
+
+                    <!-- Profile Dropdown -->
+                    <div class="relative">
+                        <button onclick="toggleProfileDropdown()" class="flex items-center space-x-3 text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">AE</span>
+                            </div>
+                            <div class="text-left">
+                                <div class="text-sm font-medium text-white">Elarouci Abdellah </div>
+                                <div class="text-xs text-gray-400">elarouciabdellah@gmail.com</div>
+                            </div>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-56 bg-card-bg border border-border-color rounded-lg shadow-lg z-50">
+                            <div class="py-2">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    Profile Settings
+                                </a>
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Account Settings
+                                </a>
+                                <div class="border-t border-border-color my-2"></div>
+                                <button onclick="window.location.href='test.html'" class="flex items-center px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/10">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    Sign Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Dashboard Content -->
+            <main class="flex-1 p-6">
+                <div class="space-y-6">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-3xl font-bold text-white">Campaign Overview</h1>
+                            <p class="text-gray-400 mt-1">Monitor your campaign performance and insights</p>
+                        </div>
+
+
+
+
+
+                        <div class="relative inline-block ml-[450px]"> <!-- positionner horizontalement -->
+    <button id="dropdownButton2" onclick="toggleProfileDropdown2()" class="bg-gradient-to-r from-[#0a0f2c] to-black text-white font-semibold px-6 py-3 pl-8 hover:opacity-90 transition-opacity rounded-lg flex items-center justify-center">
+        New Campaign
+    </button>
+
+
+
+
+
+
+
+    <div id="profileDropdown2" onclick="toggleProfileDropdown2()" class="hidden absolute right-[-30px] mt-2 w-56 bg-gradient-to-r from-[#0a0f2c] to-black border border-[#1f2937] rounded-lg shadow-lg z-50">
+        <div class="py-2">
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10">Sales</a>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10">Engagement</a>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10">Awareness</a>
+            <a href="#" class="flex items-center px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/10">App Promotion</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<!--<script>
+function toggleProfileDropdown2() {
+    // If modal already exists, remove it
+    const existing = document.getElementById('popupBackdrop2');
+    if (existing) {
+        existing.remove();
+        return;
+    }
+
+    // Create backdrop
+    const backdrop = document.createElement('div');
+    backdrop.id = 'popupBackdrop2';
+    backdrop.className = 'fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50';
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'profileDropdown2';
+    modal.className = 'bg-gradient-to-r from-[#0a0f2c] to-black border border-[#1f2937] rounded-lg shadow-lg w-72';
+
+    modal.innerHTML = `
+        <div class="py-2">
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10">Sales</a>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10">Engagement</a>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10">Awareness</a>
+            <a href="#" class="flex items-center px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/10">App Promotion</a>
+        </div>
+    `;
+
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+
+    // Close when clicking outside the modal
+    backdrop.addEventListener('click', function(event) {
+        if (!modal.contains(event.target)) {
+            backdrop.remove();
+        }
+    });
+}
+</script>  -->
+
+
+<script>
+function toggleProfileDropdown2() {
+    // If modal already exists, remove it
+    const existing = document.getElementById('popupBackdrop2');
+    if (existing) {
+        existing.remove();
+        return;
+    }
+
+    // Create backdrop
+    const backdrop = document.createElement('div');
+    backdrop.id = 'popupBackdrop2';
+    backdrop.className = 'fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50';
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'profileDropdown2';
+    modal.className = 'bg-gradient-to-r from-[#0a0f2c] to-black border border-[#1f2937] rounded-lg shadow-lg w-80 p-6';
+
+    modal.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label for="campaignName" class="block text-gray-300 mb-1">Campaign Name</label>
+                <input id="campaignName" type="text" placeholder="Enter campaign name"
+                    class="w-full px-4 py-2 rounded bg-[#0a0f2c] border border-[#1f2937] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="campaignObjective" class="block text-gray-300 mb-1">Objective</label>
+                <select id="campaignObjective"
+                    class="w-full px-4 py-2 rounded bg-[#0a0f2c] border border-[#1f2937] text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>Sales</option>
+                    <option>Engagement</option>
+                    <option>Awareness</option>
+                    <option>App Promotion</option>
+                </select>
+            </div>
+
+            <button id="createCampaignBtn"
+    class="w-full bg-gradient-to-r from-[#0a0f2c] to-black text-white font-semibold px-4 py-2 rounded-lg flex items-center justify-center transition-all duration-300
+    hover:bg-white/10 hover:backdrop-blur-sm hover:ring-1 hover:ring-white/20">
+    Create Campaign
+</button>
+
+            
+
+        
+
+        </div>
+    `;
+
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+
+    // Close when clicking outside
+    backdrop.addEventListener('click', function(event) {
+        if (!modal.contains(event.target)) {
+            backdrop.remove();
+        }
+    });
+
+    // Prevent click inside modal from closing it
+    modal.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    // Handle Create button click
+    document.getElementById('createCampaignBtn').addEventListener('click', function() {
+        const name = document.getElementById('campaignName').value;
+        const objective = document.getElementById('campaignObjective').value;
+
+        console.log('Campaign Name:', name);
+        console.log('Objective:', objective);
+
+        // ✅ You can handle your creation logic here (send to server, etc.)
+        alert('Campaign "' + name + '" with objective "' + objective + '" created!');
+
+        backdrop.remove(); // Close modal after creating
+    });
+}
+</script>
+
+
+
+
+
+
+                        <button class="gradient-primary text-white font-semibold px-8 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                            Advice Me
+                        </button>
+                        
+                    </div>
+
+                    <!-- Metrics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="metric-card rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-400 text-sm">Total Ad Spend</p>
+                                    <p class="text-2xl font-bold text-white mt-1">$12,450</p>
+                                    <div class="flex items-center mt-2">
+                                        <svg class="w-4 h-4 text-green-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                        <span class="text-sm text-green-400">+15.2%</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-blue-600/20 rounded-lg">
+                                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-400 text-sm">ROAS</p>
+                                    <p class="text-2xl font-bold text-white mt-1">4.2x</p>
+                                    <div class="flex items-center mt-2">
+                                        <svg class="w-4 h-4 text-green-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                        <span class="text-sm text-green-400">+28.1%</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-green-600/20 rounded-lg">
+                                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-400 text-sm">CTR</p>
+                                    <p class="text-2xl font-bold text-white mt-1">2.8%</p>
+                                    <div class="flex items-center mt-2">
+                                        <svg class="w-4 h-4 text-green-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                        <span class="text-sm text-green-400">+12.5%</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-purple-600/20 rounded-lg">
+                                    <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-400 text-sm">CPC</p>
+                                    <p class="text-2xl font-bold text-white mt-1">$0.42</p>
+                                    <div class="flex items-center mt-2">
+                                        <svg class="w-4 h-4 text-red-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                                        </svg>
+                                        <span class="text-sm text-red-400">-18.3%</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-orange-600/20 rounded-lg">
+                                    <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campaign Performance -->
+                    <div class="metric-card rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-semibold text-white">Campaign Performance</h2>
+                            <button class="border border-border-color text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-colors">
+                                View All
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-border-color">
+                                        <th class="text-left text-gray-400 text-sm font-medium py-3">Campaign Name</th>
+                                        <th class="text-left text-gray-400 text-sm font-medium py-3">Status</th>
+                                        <th class="text-left text-gray-400 text-sm font-medium py-3">Spend</th>
+                                        <th class="text-left text-gray-400 text-sm font-medium py-3">ROAS</th>
+                                        <th class="text-left text-gray-400 text-sm font-medium py-3">Performance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-border-color/50">
+                                        <td class="py-4 text-white font-medium">Holiday Sale Campaign</td>
+                                        <td class="py-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">Active</span>
+                                        </td>
+                                        <td class="py-4 text-gray-300">$2,847</td>
+                                        <td class="py-4 text-white font-medium">4.2x</td>
+                                        <td class="py-4">
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 text-green-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                                </svg>
+                                                <span class="text-sm text-green-400">Good</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-border-color/50">
+                                        <td class="py-4 text-white font-medium">Brand Awareness Q4</td>
+                                        <td class="py-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">Active</span>
+                                        </td>
+                                        <td class="py-4 text-gray-300">$1,923</td>
+                                        <td class="py-4 text-white font-medium">3.1x</td>
+                                        <td class="py-4">
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 text-green-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                                </svg>
+                                                <span class="text-sm text-green-400">Good</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-border-color/50">
+                                        <td class="py-4 text-white font-medium">Product Launch</td>
+                                        <td class="py-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400">Paused</span>
+                                        </td>
+                                        <td class="py-4 text-gray-300">$4,251</td>
+                                        <td class="py-4 text-white font-medium">2.8x</td>
+                                        <td class="py-4">
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 text-red-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                                                </svg>
+                                                <span class="text-sm text-red-400">Needs Attention</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profileDropdown');
+            const button = event.target.closest('button[onclick="toggleProfileDropdown()"]');
+            
+            if (!button && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <!-- Insert the new chatbot from cc.html -->
+    <!-- Bouton flottant -->
+    <div id="chatbotToggle"
+         title="Ouvrir le chatbot IA"
+         role="button"
+         tabindex="0"
+         class="fixed bottom-8 right-8 w-14 h-14 bg-blue-500 rounded-full shadow-lg cursor-pointer flex items-center justify-center hover:bg-blue-600 transition duration-300 z-[1000]">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="size-6">
+        <path fill-rule="evenodd" d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813A3.75 3.75 0 0 0 7.466 7.89l.813-2.846A.75.75 0 0 1 9 4.5ZM18 1.5a.75.75 0 0 1 .728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 0 1 0 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 0 1-1.456 0l-.258-1.036a2.625 2.625 0 0 0-1.91-1.91l-1.036-.258a.75.75 0 0 1 0-1.456l1.036-.258a2.625 2.625 0 0 0 1.91-1.91l.258-1.036A.75.75 0 0 1 18 1.5ZM16.5 15a.75.75 0 0 1 .712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 0 1 0 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 0 1-1.422 0l-.395-1.183a1.5 1.5 0 0 0-.948-.948l-1.183-.395a.75.75 0 0 1 0-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0 1 16.5 15Z" clip-rule="evenodd" />
+      </svg>
+    </div>
+
+    <!-- Chatbot Container -->
+    <div id="chatbot"
+         class="fixed bottom-[100px] right-8 w-[360px] max-h-[600px] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col opacity-0 pointer-events-none translate-y-5 transition-all duration-300 z-[999]">
+      <!-- Header -->
+      <div class="bg-blue-500 text-white px-5 py-4 text-lg font-bold flex justify-between items-center">
+        AdVise AI
+        <button id="closeChatbot" class="text-white text-2xl font-bold hover:text-blue-100">&times;</button>
+      </div>
+      <!-- Chat Body -->
+      <div id="chatBody" class="bg-blue-100 px-5 py-4 h-[380px] overflow-y-auto flex flex-col gap-3">
+        <!-- Welcome message will be added here -->
+      </div>
+      <!-- Footer -->
+      <form id="chatbotForm" class="flex items-center p-2 border-t border-gray-200 bg-white relative">
+        <input type="text"
+               id="chatInput"
+               required
+               autocomplete="off"
+               placeholder="Tapez votre message..."
+               class="flex-1 px-4 py-2 text-sm rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900" />
+        <input type="file" id="imageInput" accept="image/*" class="hidden">
+        <button type="button" id="btnImageUpload"
+                class="w-9 h-9 ml-2 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl hover:bg-blue-300 transition duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 002.828 2.828L18 9.828M7 7h.01M7 7v.01" />
+          </svg>
+        </button>
+        <button type="button" id="btnPlus"
+                class="w-9 h-9 ml-2 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl hover:bg-blue-300 transition duration-200">+</button>
+        <button type="submit" id="btnSend"
+                class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-full text-xs font-semibold hover:bg-blue-600 transition duration-200 h-9">Envoyer</button>
+        <!-- Menu -->
+        <div id="chatbotMenu"
+             class="absolute bottom-14 right-16 bg-white rounded-xl shadow-lg p-2 flex gap-3 opacity-0 pointer-events-none translate-y-2 transition-all duration-200 z-[1000]">
+          <!-- Menu buttons can be added here -->
+        </div>
+      </form>
+    </div>
+
+    <script>
+      const chatbot = document.getElementById('chatbot');
+      const toggleBtn = document.getElementById('chatbotToggle');
+      const closeBtn = document.getElementById('closeChatbot');
+      const menuBtn = document.getElementById('btnPlus');
+      const menu = document.getElementById('chatbotMenu');
+
+      // Toggle chatbot visibility
+      toggleBtn.addEventListener('click', () => {
+        chatbot.classList.toggle('opacity-0');
+        chatbot.classList.toggle('pointer-events-none');
+        chatbot.classList.toggle('translate-y-5');
+      });
+
+      closeBtn.addEventListener('click', () => {
+        chatbot.classList.add('opacity-0');
+        chatbot.classList.add('pointer-events-none');
+        chatbot.classList.add('translate-y-5');
+      });
+
+      menuBtn.addEventListener('click', () => {
+        menu.classList.toggle('opacity-0');
+        menu.classList.toggle('pointer-events-none');
+        menu.classList.toggle('translate-y-2');
+      });
+
+      // Chat Script
+      const chatBody = document.querySelector("#chatBody");
+      const messageInput = document.querySelector("#chatInput");
+      const sendMessageButton = document.querySelector("#btnSend");
+      const chatForm = document.querySelector("#chatbotForm");
+
+      const API_KEY = "AIzaSyBpLxrwmAGq3hcwUjArRA60Y-q13la_IpA";
+      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+      const userData = { message: null };
+      const chatHistory = [];
+      const createMessageElement = (content, ...classes) => {
+        const div = document.createElement("div");
+        div.classList.add("message", ...classes, "rounded-lg", "p-3", "max-w-[80%]", "text-sm");
+
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("message-text", "whitespace-pre-wrap","text-black");
+        msgDiv.innerHTML = content;
+
+        div.appendChild(msgDiv);
+        return div;
+      };
+
+      // Add welcome message
+      const addWelcomeMessage = () => {
+        const welcomeMessage = "Bonjour ! Je suis AdVise AI, votre assistant virtuel. Comment puis-je vous aider aujourd'hui ?";
+        const welcomeMessageDiv = createMessageElement(welcomeMessage, "bg-white", "self-start");
+        chatBody.appendChild(welcomeMessageDiv);
+        chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+      };
+      // Helper to clean markdown-like formatting
+      const removeDoubleAsterisks = (text) => {
+        return text.replace(/\*\*(.*?)\*\*/g, '$1');
+        };
+
+      const imageInput = document.getElementById("imageInput");
+      const imageUploadButton = document.getElementById("btnImageUpload");
+      let imageBase64 = null;
+      let imageMimeType = null;
+
+      imageUploadButton.addEventListener("click", () => {
+        imageInput.click();
+      });
+
+      imageInput.addEventListener("change", async () => {
+        const file = imageInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imageBase64 = e.target.result.split(",")[1];
+          imageMimeType = file.type;
+          // Optionally, show a preview or a message in the chat
+          const previewDiv = createMessageElement("Image sélectionnée : " + file.name, "bg-blue-200", "self-end");
+          chatBody.appendChild(previewDiv);
+          chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+        };
+        reader.readAsDataURL(file);
+      });
+
+      const generateBotResponse = async (incomingMessageDiv) => {
+        const messageElement = incomingMessageDiv.querySelector('.message-text');
+        // Build the history for the request, including the new user message
+        let userParts = [];
+        if (userData.message) {
+          userParts.push({ text: userData.message });
+        }
+        if (imageBase64 && imageMimeType) {
+          userParts.push({
+            inlineData: {
+              mimeType: imageMimeType,
+              data: imageBase64
+            }
+          });
+        }
+        const historyForRequest = [...chatHistory, { role: "user", parts: userParts }];
+
+        try {
+          const response = await fetch(
+            API_URL,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: historyForRequest
+              })
+            }
+          );
+
+          const data = await response.json();
+
+          let apiResponseText = "";
+          if (
+            data.candidates &&
+            data.candidates[0] &&
+            data.candidates[0].content &&
+            data.candidates[0].content.parts &&
+            data.candidates[0].content.parts[0].text
+          ) {
+            apiResponseText = data.candidates[0].content.parts[0].text.trim();
+          } else if (data.response) {
+            apiResponseText = data.response.trim();
+          } else if (data.error && data.error.message) {
+            apiResponseText = "Erreur Gemini: " + data.error.message;
+          } else {
+            apiResponseText = "Désolé, je n'ai pas compris la réponse de Gemini.";
+          }
+          messageElement.innerText = removeDoubleAsterisks(apiResponseText);
+
+          // Now update the chatHistory with both user and model turns
+          chatHistory.push({ role: "user", parts: userParts });
+          chatHistory.push({ role: "model", parts: [{ text: apiResponseText }] });
+          // Reset image after sending
+          imageBase64 = null;
+          imageMimeType = null;
+
+        } catch (error) {
+          console.error(error);
+          messageElement.innerText = "Erreur: " + error.message;
+          messageElement.classList.add("text-red-600");
+        } finally {
+          incomingMessageDiv.classList.remove("thinking");
+          chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+        }
+      };
+
+      const handleOutgoingMessages = (e) => {
+        userData.message = messageInput.value.trim();
+        if (!userData.message && !imageBase64) return;
+
+        if (userData.message) {
+          const outgoingMessageDiv = createMessageElement(userData.message, "bg-blue-200", "self-end");
+          chatBody.appendChild(outgoingMessageDiv);
+          chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+        }
+        if (imageBase64) {
+          const outgoingImageDiv = createMessageElement("[Image envoyée]", "bg-blue-200", "self-end");
+          chatBody.appendChild(outgoingImageDiv);
+          chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+        }
+
+        messageInput.value = "";
+
+        setTimeout(() => {
+          const incomingMessageDiv = createMessageElement("...", "bg-white", "self-start", "thinking");
+          chatBody.appendChild(incomingMessageDiv);
+          chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+          generateBotResponse(incomingMessageDiv);
+        }, 600);
+      };
+
+      // Event listeners
+      messageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && messageInput.value.trim()) {
+          handleOutgoingMessages(e);
+        }
+      });
+
+      chatForm.addEventListener("submit", (e) => {
+        e.preventDefault(); // ✅ Prevent form reload
+        handleOutgoingMessages(e);
+      });
+
+      // Initialize welcome message when page loads
+      window.addEventListener('load', () => {
+        addWelcomeMessage();
+      });
+    </script>
+
+</body>
+</html>
