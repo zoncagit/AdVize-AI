@@ -99,10 +99,29 @@ def upsert_oauth(db: Session, user_id: int, oauth: schemas.OAuthCredentialBase):
     return db_oauth
 
 def get_ad_accounts(db: Session, user_id: int):
-    return db.query(models.AdAccount).filter(models.AdAccount.user_id == user_id).all()
+    try:
+        print(f"Fetching ad accounts for user_id: {user_id}")
+        accounts = db.query(models.AdAccount).filter(models.AdAccount.user_id == user_id).all()
+        print(f"Found {len(accounts)} accounts")
+        return accounts
+    except Exception as e:
+        print(f"Error in get_ad_accounts: {str(e)}")
+        raise
 
-def create_ad_account(db: Session, ad_account: schemas.AdAccountCreate):
-    db_acc = models.AdAccount(**ad_account.dict())
+def get_ad_account(db: Session, account_id: int, user_id: int):
+    return db.query(models.AdAccount).filter(
+        models.AdAccount.id == account_id,
+        models.AdAccount.user_id == user_id
+    ).first()
+
+def create_ad_account(db: Session, ad_account: schemas.AdAccountCreate, user_id: int):
+    # Convert connected_at string to datetime if it's a string
+    account_data = ad_account.dict()
+    if 'connected_at' in account_data and isinstance(account_data['connected_at'], str):
+        from datetime import datetime
+        account_data['connected_at'] = datetime.fromisoformat(account_data['connected_at'].replace('Z', '+00:00'))
+    
+    db_acc = models.AdAccount(**account_data, user_id=user_id)
     db.add(db_acc)
     db.commit()
     db.refresh(db_acc)
